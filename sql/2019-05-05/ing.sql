@@ -47,3 +47,11 @@ select date_format(load_date,'%Y-%m-%d %H:%i'),count(*) sl
 from app.app_rec_realtime group by date_format(load_date,'%Y-%m-%d %H:%i')) a;
 
 select * from app.app_rec_realtime  order by load_date desc limit 100;
+--------------------------------------------------------------------------------------------------------------
+
+
+select a.sn,a.ecp
+from bi_ods_ga.ods_app_sdk_log a
+lateral view json_tuple(a.ecp,'tv','ctp','sp','a','c') b as tv,ctp,sp,a,c
+where a.dt between '2019-05-04' and '2019-05-04' and a.sn regexp '好价/P/'
+and a.av regexp '^9.4' limit 200;
