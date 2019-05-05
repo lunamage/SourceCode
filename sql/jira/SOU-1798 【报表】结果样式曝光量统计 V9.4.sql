@@ -24,7 +24,7 @@ from bi_ods_ga.ods_app_sdk_log a
 lateral view json_tuple(a.ecp,'srm','spp','ssid') b as srm,spp,ssid
 where a.dt='2019-05-04' and a.ec='04' and a.av regexp '^9.[4-9]'
 and a.it between '2019-05-04' and concat('2019-05-04',' 23:59:59')
-and b.srm not regexp '^通用_' and b.spp regexp '_综合$'
+and b.srm not regexp '^通用_' and b.spp regexp '综合'
 group by b.srm;
 
 
