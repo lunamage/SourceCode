@@ -1,0 +1,167 @@
+spark2-sql --name 'zyl_test' --queue bi --driver-memory 4g --executor-cores 4 --master yarn --executor-memory 10g --num-executors 30 --conf spark.default.parallelism=300 --jars /opt/app/hdp/2.6.3.0-235/hive2/lib/mysql-connector-java-commercial-5.1.40-bin.jar --driver-class-path /opt/app/hdp/2.6.3.0-235/hive2/lib/mysql-connector-java-commercial-5.1.40-bin.jar
+--conf spark.sql.shuffle.partitions=1000
+hive --hiveconf hive.cli.print.current.db=true --hiveconf hive.cli.print.header=true
+
+spark-sql --name 'zyl_test' --driver-memory 4g --executor-cores 4 --master yarn --executor-memory 10g --num-executors 10
+
+spark.sql.shuffle.partitions
+
+hadoop distcp -Dmapreduce.job.queuename=bi -Dmapreduce.map.memory.mb=4000 -Dmapreduce.reduce.memory.mb=6000 hdfs://10.9.168.244:9000/ga/stg_ga_original_data/2017-11-22/* hdfs://10.253.0.5:8020/bi/stg_ga/stg_ga_original_data/2017-11-22
+
+set spark.sql.shuffle.partitions=30;
+set spark.default.parallelism=300;
+
+set hive.exec.dynamic.partition=true;
+set hive.exec.dynamic.partition.mode=nostrict;
+set mapred.job.queue.name=bi;
+set mapred.max.split.size=256000000;
+set mapred.min.split.size.per.node=100000000;
+set mapred.min.split.size.per.rack=100000000;
+set hive.cli.print.header=true;
+
+sudo -usmzdm mysql -h dev_ga_data_warehouse_mysql_m01 -uwdDBUser -p'2Gb(tv+-n' -B dev_ga_data_warehouse -e     "
+sudo -usmzdm mysql -h dingyuedb_mysql_s01 -usmzdm_dy -psmzdmdy_162304 -P3402 -B smzdm_dingyue -e     "
+sudo -usmzdm mysql -h smzdm_userdb_mysql_m01 -usmzdm_users -p'Users_162304' -P3404 -B UserDB -e     "
+sudo -usmzdm mysql -h new_product_mysql_s01 -ureadonly_user -P3306 -p'xDtGFPg4pyDgwTZD' -B new_productDB -e     "
+sudo -usmzdm mysql -h dev_merchant_baoliao -umer_bl_user -P3306 -p'qerf32OVEQf4' -B merchant_baoliao -e     "
+sudo -usmzdm mysql -h 10.9.52.198 -ubi_report_user -P3306 -p'sdf51OIR3B1f' -B bi_report_interface -e     "
+
+
+select user_id from rule_base_user where rule_base_id=243279
+" > /home/zhaoyulong/t1.txt
+
+mysqldump -h dev_merchant_baoliao -umer_bl_user -P3306 -p'qerf32OVEQf4' merchant_baoliao interface_merchant_bl_values>/home/zhaoyulong/t1.sql
+/usr/bin/mysqldump -hdev_follow_highquality_rule -uhighquality_user -phw247gbT2IFA3 follow_highquality_rule mid_newuser_follow_list> /home/zhaoyulong/mid_newuser_follow_list.sql
+
+SELECT field('halo','hello','halo','test','world');
+
+ALTER TABLE fact_ga_article_flow DROP IF EXISTS PARTITION (dt=*);
+ALTER TABLE stg_ga_original_data ADD PARTITION (dt='2015-10-16') location '/bi/stg_ga/stg_ga_original_data/2015-10-16/';
+hive --hiveconf hive.execution.engine=mr -e "use stg; ALTER TABLE db_baoliao_baoliao_evaluate DROP IF EXISTS PARTITION (dt='$tx_date');"
+hive --hiveconf hive.execution.engine=mr -e "use stg; ALTER TABLE db_baoliao_baoliao_evaluate ADD PARTITION (dt='$tx_date') LOCATION '/bi/stg/db_baoliao_baoliao_evaluate/$tx_date';"
+
+insert overwrite local directory '/data/tmp/zhaoyulong/data' row format delimited fields terminated by '\t'
+select *from bi_test.zyl_tmp_190429_4 order by abtest,cast(sl as int);
+
+scp /data/jenkins/jobs/stg.tar.gz root@jenkins_new:/data/jenkins/jobs/
+scp -r /data/jenkins root@jenkins_new:/data/jenkins
+
+curl http://hadoop002:19888/jobhistory/attempts/job_1551780685180_261447/m/FAILED
+
+http://106.75.20.192/#/projects
+10.10.172.28
+2Gb(tv+-n
+
+select count(userid11)
+from(
+SELECT
+  MAX(IF(hits.customDimensions.index=16, hits.customDimensions.value, NULL)) WITHIN hits AS userid11
+FROM
+  [''confident-coda-103312:110173103.ga_sessions_20161220])
+where userid11 is not null
+
+select fullVisitorId,clientId,
+sum(if(hits.type ='APPVIEW',0,1)) addcart,
+sum(if(hits.type ='APPVIEW',1,0)) pv
+FROM (TABLE_DATE_RANGE([110173103.ga_sessions_], TIMESTAMP('2019-04-01'), TIMESTAMP('2019-04-01'))) a
+where hits.customDimensions.index=18 and hits.customDimensions.value='yingyongbao'
+and (hits.appinfo.appid='com.smzdm.client.android' or hits.appinfo.appid='com.smzdm.client.ios')
+and (hits.type ='APPVIEW' or hits.eCommerceAction.action_type='3' and hits.eventInfo.eventAction like '%添加到购物车%')
+group by fullVisitorId,clientId;
+
+--compression-codec org.apache.hadoop.io.compress.SnappyCodec
+
+业务
+mr 原理
+数据倾斜  原因 解决方式
+数据建模，事实表 维度表，事实表设计 遵守什么样的规则
+
+事务事实表 事务事实表记录的事务层面的事实，保存的是最原子的数据
+周期快照事实表 周期快照事实表以具有规律性的、可预见的时间间隔来记录事实，时间间隔如每天、每月、每年等等。
+累积快照事实表 累积快照事实表和周期快照事实表有些相似之处，它们存储的都是事务数据的快照信息。但是它们之间也有着很大的不同，周期快照事实表记录的确定的周期的数据，而累积快照事实表记录的不确定的周期的数据。
+
+商品维度 母婴
+
+数据质量怎么做的。
+数据生命周期
+
+买家id 卖家id 商品id 时间：老访客的访问数
+
+https://apptrackapi.umeng.com/?c=download&a=getdatadetail&app_key=507d0fa95270157cf000005f&user_key=b02f0c434ba1da7396aca257d0eb1e2f&timestamp=1524812463&active_date=20180426&auth=4d640364d4c4dced070105716e4ddb11
+
+add jar /data/source/data_warehouse/ga/jar/base64.jar;
+create temporary function jie as 'Udf.DecodeBase64';
+select jie('eyJ0eXBlIjoiY2F0ZWdvcnkiLCJrZXl3b3JkIjoiXHU2YzdkXHU4ZjY2XHU4OGM1XHU5OTcwIiwiY2hhbm5lbCI6ImZheGlhbiIsInB1c2hfdG9wX2lkcyI6Ijk5MDAxODUsOTkwNzM2MiJ9');
+
+add jar /data/source/data_warehouse/ga/jar/udf.jar;
+create temporary function jie as 'Udf.DecoderUrl';
+select jie('%E6%B7%98%E7%B3%BB');
+
+add jar /data/source/data_warehouse/zdw/0500.ETL/PUB/UDF/unicode2String.jar;
+create temporary function jie as 'hive_UDF.unicode2String';
+select jie('%E6%B7%98%E7%B3%BB');
+
+{"visitNumber":"1","visitId":"1531708301","visitStartTime":"1531708301","date":"20180716","totals":{"visits":"1","hits":"1","pageviews":"1","bounces":"1","newVisits":"1","sessionQualityDim":"0"},"trafficSource":{"referralPath":"(not set)","campaign":"(not set)","source":"(direct)","medium":"(none)","keyword":"(not set)","adContent":"(not set)","adwordsClickInfo":{},"isTrueDirect":true},"device":{"browser":"Safari (in-app)","browserVersion":"(not set)","browserSize":"380x600","operatingSystem":"iOS","operatingSystemVersion":"11.4","isMobile":true,"mobileDeviceBranding":"Apple","mobileDeviceModel":"iPhone","mobileInputSelector":"touchscreen","mobileDeviceInfo":"Apple iPhone","mobileDeviceMarketingName":"(not set)","flashVersion":"(not set)","javaEnabled":false,"language":"zh-cn","screenColors":"32-bit","screenResolution":"375x667","deviceCategory":"mobile"},"geoNetwork":{"continent":"Asia","subContinent":"Eastern Asia","country":"China","region":"Hunan","metro":"(not set)","city":"Changsha","cityId":"1003541","networkDomain":"unknown.unknown","latitude":"28.2282","longitude":"112.9388","networkLocation":"chinanet hunan province network"},"customDimensions":[{"index":"8","value":"Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15F79"}],"hits":[{"hitNumber":"1","time":"0","hour":"10","minute":"31","isInteraction":true,"isEntrance":true,"isExit":true,"referer":"https://m.smzdm.com/fenlei/sushenku/","page":{"pagePath":"/wiki.m.smzdm.com/p/egy971/","hostname":"wiki.m.smzdm.com","pageTitle":"MAIDENFORM Flexees 女士塑身无痕打底裤【价格 测评 怎么样】_什么值得买","pagePathLevel1":"/wiki.m.smzdm.com/","pagePathLevel2":"/p/","pagePathLevel3":"/egy971/","pagePathLevel4":"/"},"appInfo":{"screenName":"wiki.m.smzdm.com/wiki.m.smzdm.com/p/egy971/","landingScreenName":"wiki.m.smzdm.com/wiki.m.smzdm.com/p/egy971/","exitScreenName":"wiki.m.smzdm.com/wiki.m.smzdm.com/p/egy971/","screenDepth":"0"},"exceptionInfo":{"isFatal":true},"product":[{"productSKU":"2403061","v2ProductName":"MAIDENFORM Flexees  女士塑身无痕打底裤","v2ProductCategory":"塑身裤/无/无/无","productVariant":"(not set)","productBrand":"MAIDENFORM","productPrice":"159000000","localProductPrice":"0","customDimensions":[],"customMetrics":[],"productListName":"WAP","productListPosition":"0","productCouponCode":"(not set)"}],"promotion":[],"eCommerceAction":{"action_type":"2","step":"1"},"experiment":[],"customVariables":[],"customDimensions":[{"index":"1","value":"无"},{"index":"2","value":"无"},{"index":"3","value":"MAIDENFORM"},{"index":"4","value":"无"},{"index":"5","value":"无"},{"index":"6","value":"塑身裤"},{"index":"7","value":"无"},{"index":"8","value":"Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15F79"},{"index":"13","value":"wiki"},{"index":"35","value":"无"},{"index":"37","value":"egy971"},{"index":"50","value":""}],"customMetrics":[],"type":"PAGE","social":{"socialNetwork":"(not set)","hasSocialSourceReferral":"No","socialInteractionNetworkAction":" : "},"contentGroup":{"contentGroup1":"(not set)","contentGroup2":"(not set)","contentGroup3":"(not set)","contentGroup4":"(not set)","contentGroup5":"(not set)","previousContentGroup1":"(entrance)","previousContentGroup2":"(entrance)","previousContentGroup3":"(entrance)","previousContentGroup4":"(entrance)","previousContentGroup5":"(entrance)"},"dataSource":"web","publisher_infos":[]}],"fullVisitorId":"29845102206387085","clientId":"6948854.1531708301","channelGrouping":"Direct","socialEngagementType":"Not Socially Engaged"}
+
+hadoop jar test_mr.jar MapReduce/JsonJobSubmitter /bi/test/test_json /bi/test/test_json_out
+
+rsync -av --progress /data/tmp/zhaoyulong/data/* root@10.9.16.199:/data/machinelearning/data/train_data_data
+rsync -av --progress tmp1027.sh bi@azkaban:/data/source/data_warehouse/ga/script/tmp/tmp1027.sh
+
+rsync -av --progress /data/feature_center_factory/purchasepower/* bi@azkaban:/data/feature_center_factory/purchasepower
+
+alter table fact_ga_hits_data change column dim15 dim15 string COMMENT '发现AB测试';
+
+http://api.umeng.com/durations?auth_token=UUgO9uBFPdjnCKB0aKlM&appkey=507d0fa95270157cf000005f&start_date=2018-05-01&end_date=2018-05-02&period_type=daily
+
+ALTER TABLE home_exposure_summary_v1 CHANGE b_mean_brand_sec_1d b_mean_sec_1d String comment '历史一天平均品牌电商点击偏好';
+
+Apache Atlas
+LinkedIn WhereHows
+
+
+ssh zhaoyulong@jumpserver-itoamms.smzdm.com -p 2222
+
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-topics.sh --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181 --list
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-topics.sh --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181 --describe --topic app-sdk-log
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-topics.sh --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181 --create --topic zyltest --partitions 1  --replication-factor 1
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-producer.sh --broker-list hadoop001:6667,hadoop002:6667,hadoop003:6667 --topic zyltest
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --from-beginning
+
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --max-messages 10
+
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-run-class.sh kafka.tools.ConsumerOffsetChecker
+
+{"imei":"123","aid":"com.smzdm.client.ios","lng":"117.1219331955941","sid":"15535788371060","uid":"234891237","tid":"UA-1000000-1","an":"smzdm","ca":"0","sr":"1125x2436","uuid":"39BEE7FF-AC4E-4048-9CDD-124676B0B73E","ecp":"{\"tv\":\"a\",\"sp\":\"0\",\"a\":\"123456\",\"17\":\"a\",\"13\":\"a\",\"21\":\"首页_推荐_feed流_a_首页强制置顶\",\"20\":\"3\",\"11\":\"youhui\"}","idfa":"1MgqjeT41eINeS+IAsBZE+kJt5H9fZBdkvcqjYaDTdSfofPO6MzmDg==","type":"screenview","ift":"0","st":"iPhone","sn":"iPhone\/3\/12967582\/","v":"1.10","isnp":"1","ip":"117.50.12.220","sv":"1.1.0","dt":"1","ds":"app","ch":"AppStore","slt":1553579109,"av":"9.3.15","it":"1553579081445","cid":"VkF\/KKe4KaP\/oEDFDjcvOpRVnmK8FdfiyHmZNngjnTL1CSKIgp9s7g==.1552356749870","lat":"39.09510244436872","dm":"iPhone10,3","did":"VkF\/KKe4KaP\/oEDFDjcvOpRVnmK8FdfiyHmZNngjnTL1CSKIgp9s7g==","hnb":"54","os":"12.1","nt":"wifi","idfv":"eUJ9EhWsh\/SvKKbrkXrSYrHZhS0mpnkOgomb9kJfDgMkwUIWzBkUpg==","ec":"01","ea":"01","el":"推荐_asas"}
+{"imei":"123","aid":"com.smzdm.client.ios","lng":"117.1219331955941","sid":"15535788371060","uid":"234891237","tid":"UA-1000000-1","an":"smzdm","ca":"0","sr":"1125x2436","uuid":"39BEE7FF-AC4E-4048-9CDD-124676B0B73E","ecp":"{\"tv\":\"a\",\"sp\":\"0\",\"a\":\"123456\",\"17\":\"a\",\"13\":\"b\",\"21\":\"首页_推荐_feed流_a_首页强制置顶\",\"20\":\"3\",\"11\":\"youhui\"}","idfa":"1MgqjeT41eINeS+IAsBZE+kJt5H9fZBdkvcqjYaDTdSfofPO6MzmDg==","type":"screenview","ift":"0","st":"iPhone","sn":"iPhone\/3\/12967582\/","v":"1.10","isnp":"1","ip":"117.50.12.220","sv":"1.1.0","dt":"1","ds":"app","ch":"AppStore","slt":1553579109,"av":"9.3.15","it":"1553579081445","cid":"VkF\/KKe4KaP\/oEDFDjcvOpRVnmK8FdfiyHmZNngjnTL1CSKIgp9s7g==.1552356749870","lat":"39.09510244436872","dm":"iPhone10,3","did":"VkF\/KKe4KaP\/oEDFDjcvOpRVnmK8FdfiyHmZNngjnTL1CSKIgp9s7g==","hnb":"54","os":"12.1","nt":"wifi","idfv":"eUJ9EhWsh\/SvKKbrkXrSYrHZhS0mpnkOgomb9kJfDgMkwUIWzBkUpg==","ec":"首页","ea":"首页站内文章点击","el":"推荐_asas"}
+{"imei":"123","aid":"com.smzdm.client.ios","lng":"117.1219331955941","sid":"15535788371060","uid":"234891237","tid":"UA-1000000-1","an":"smzdm","ca":"0","sr":"1125x2436","uuid":"39BEE7FF-AC4E-4048-9CDD-124676B0B73E","ecp":"{\"tv\":\"a\",\"sp\":\"0\",\"a\":\"123456\",\"17\":\"a\",\"13\":\"b\",\"21\":\"首页_推荐_feed流_a_首页强制置顶\",\"20\":\"3\",\"11\":\"youhui\"}","idfa":"1MgqjeT41eINeS+IAsBZE+kJt5H9fZBdkvcqjYaDTdSfofPO6MzmDg==","type":"screenview","ift":"0","st":"iPhone","sn":"iPhone\/3\/12967582\/","v":"1.10","isnp":"1","ip":"117.50.12.220","sv":"1.1.0","dt":"1","ds":"app","ch":"AppStore","slt":1553579109,"av":"9.3.15","it":"1553579081445","cid":"VkF\/KKe4KaP\/oEDFDjcvOpRVnmK8FdfiyHmZNngjnTL1CSKIgp9s7g==.1552356749870","lat":"39.09510244436872","dm":"iPhone10,3","did":"VkF\/KKe4KaP\/oEDFDjcvOpRVnmK8FdfiyHmZNngjnTL1CSKIgp9s7g==","hnb":"54","os":"12.1","nt":"wifi","idfv":"eUJ9EhWsh\/SvKKbrkXrSYrHZhS0mpnkOgomb9kJfDgMkwUIWzBkUpg==","ec":"增强型电子商务","ea":"添加到购物车","el":"推荐_asas"}
+
+analytics-zcollect
+
+flink run -m yarn-cluster -c com.zdm.zyl.SdkToFlinkAggregations zyl-0.1.jar
+flink run -m yarn-cluster -c com.zdm.zyl.SdkToFlinkAggregations -yqu bi -p 24 -yn 8 -ys 8 -ytm 8192 zyl-0.1.jar &
+
+ yarn-session.sh -n 4 -jm 1024 -tm 4096
+
+yarn logs -applicationId application_1551780685180_381240 > logs.txt
+yarn logs -applicationId application_1551780685180_380816
+
+cd /data/hadoop/yarn/log/		taskmanager.out
+ps -ef |grep 1554383939428_4618
+
+
+vim /data/source/data_warehouse/ml_recsys2/rec_sh/preference_all_redis.sh
+vim /data/source/data_warehouse/ml_recsys2/rec_sh/preference_all_redis.py
+
+---------------
+CREATE EXTERNAL TABLE `zyl_tmp_190426`(
+  `id` int,
+  `user_id` string)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
+LOCATION 'hdfs://cluster/bi/test/zyl_tmp_190426';
+
+insert overwrite local directory '/data/tmp/zhaoyulong/data' row format delimited fields terminated by '\t'
+select a.id,a.user_id,b.smzdm_id
+from bi_test.zyl_tmp_190426 a
+left join (select * from stg.db_udc_account where dt='2019-04-25') b on a.user_id=b.user_id
+order by id;
