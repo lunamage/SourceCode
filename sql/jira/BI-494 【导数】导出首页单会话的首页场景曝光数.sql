@@ -1,4 +1,5 @@
---https://jira-team.smzdm.com/browse/BI-406
+https://jira-team.smzdm.com/browse/BI-406
+
 create table bi_test.zyl_tmp_190505_2 as
 select dt,sl,count(*) session_count
 from(

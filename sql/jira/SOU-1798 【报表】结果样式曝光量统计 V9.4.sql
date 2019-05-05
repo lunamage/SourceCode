@@ -1,4 +1,4 @@
---https://jira-team.smzdm.com/browse/SOU-1798
+https://jira-team.smzdm.com/browse/SOU-1798
 
 /*表1
 日期
