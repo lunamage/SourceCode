@@ -452,8 +452,6 @@ order by pubdate;
 select * from bi_test.zyl_tmp_190428_3 where id='12971191' order by r;
 
 
-"
-
 
 10.19.146.157 bi_test_user / Z16woifm82jzT4s
 
