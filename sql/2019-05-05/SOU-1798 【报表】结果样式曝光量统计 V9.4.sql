@@ -43,3 +43,22 @@ CREATE TABLE `app_sdk_search_style` (
   `did_count` bigint(20) COMMENT '唯一did数',
   KEY `idx_app_sdk_search_style01` (`stat_dt`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+sh /data/source/data_warehouse/ga/script/pub/exec_sparksql2.sh app_sdk_search 4 10 30 /data/source/data_warehouse/ga/script/app/search/ app_sdk_search 2019-05-03
+sh /data/source/data_warehouse/ga/script/pub/exec_sqoop_export_delete.sh 10.9.28.135:3320/app wdDBUser '2Gb(tv+-n' app_sdk_search_style '/bi/app_ga/app_sdk_search_style/dt=' "delete from app_sdk_search_style where stat_dt=" 2019-05-03
+
+sh /data/source/data_warehouse/ga/script/pub/exec_sparksql2.sh app_sdk_search 4 10 30 /data/source/data_warehouse/ga/script/app/search/ app_sdk_search 2019-05-02
+sh /data/source/data_warehouse/ga/script/pub/exec_sqoop_export_delete.sh 10.9.28.135:3320/app wdDBUser '2Gb(tv+-n' app_sdk_search_style '/bi/app_ga/app_sdk_search_style/dt=' "delete from app_sdk_search_style where stat_dt=" 2019-05-02
+
+sh /data/source/data_warehouse/ga/script/pub/exec_sparksql2.sh app_sdk_search 4 10 30 /data/source/data_warehouse/ga/script/app/search/ app_sdk_search 2019-05-01
+sh /data/source/data_warehouse/ga/script/pub/exec_sqoop_export_delete.sh 10.9.28.135:3320/app wdDBUser '2Gb(tv+-n' app_sdk_search_style '/bi/app_ga/app_sdk_search_style/dt=' "delete from app_sdk_search_style where stat_dt=" 2019-05-01
+
+sh /data/source/data_warehouse/ga/script/pub/exec_sparksql2.sh app_sdk_search 4 10 30 /data/source/data_warehouse/ga/script/app/search/ app_sdk_search 2019-04-30
+sh /data/source/data_warehouse/ga/script/pub/exec_sqoop_export_delete.sh 10.9.28.135:3320/app wdDBUser '2Gb(tv+-n' app_sdk_search_style '/bi/app_ga/app_sdk_search_style/dt=' "delete from app_sdk_search_style where stat_dt=" 2019-04-30
+
+sh /data/source/data_warehouse/ga/script/pub/exec_sparksql2.sh app_sdk_search 4 10 30 /data/source/data_warehouse/ga/script/app/search/ app_sdk_search 2019-04-29
+sh /data/source/data_warehouse/ga/script/pub/exec_sqoop_export_delete.sh 10.9.28.135:3320/app wdDBUser '2Gb(tv+-n' app_sdk_search_style '/bi/app_ga/app_sdk_search_style/dt=' "delete from app_sdk_search_style where stat_dt=" 2019-04-29
+
+sh /data/source/data_warehouse/ga/script/pub/exec_sparksql2.sh app_sdk_search 4 10 30 /data/source/data_warehouse/ga/script/app/search/ app_sdk_search 2019-04-28
+sh /data/source/data_warehouse/ga/script/pub/exec_sqoop_export_delete.sh 10.9.28.135:3320/app wdDBUser '2Gb(tv+-n' app_sdk_search_style '/bi/app_ga/app_sdk_search_style/dt=' "delete from app_sdk_search_style where stat_dt=" 2019-04-28
