@@ -118,4 +118,18 @@ WHERE
     FROM
         t_app_baoliao_8newmodel a
     WHERE
-        a.bl_date = DATE_SUB(current_date,INTERVAL 1 DAY)
+        a.bl_date = DATE_SUB(current_date,INTERVAL 1 DAY);
+
+
+
+select hits_appinfo_screenname,article_id
+from bi_dw_ga.fact_ga_hits_data a
+where a.dt ='2019-05-01'
+and hits_type='APPVIEW' and a.hits_appinfo_appid in('com.smzdm.client.android','com.smzdm.client.ios')
+and hits_appinfo_screenname regexp '好价/P/13655818|好价/过期/P/13655818';
+
+select count(*)
+from bi_dw_ga.fact_ga_hits_data a
+where a.dt ='2019-05-01'
+and hits_type='APPVIEW' and a.hits_appinfo_appid in('com.smzdm.client.android','com.smzdm.client.ios')
+and article_id='13655818';

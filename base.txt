@@ -143,7 +143,7 @@ flink run -m yarn-cluster -c com.zdm.zyl.SdkToFlinkAggregations -yqu bi -p 24 -y
 
  yarn-session.sh -n 4 -jm 1024 -tm 4096
 
-yarn logs -applicationId application_1551780685180_381240 > logs.txt
+yarn logs -applicationId application_1551780685180_386311 > logs.txt
 yarn logs -applicationId application_1551780685180_380816
 
 cd /data/hadoop/yarn/log/		taskmanager.out
