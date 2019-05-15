@@ -46,7 +46,7 @@ select *from bi_test.zyl_tmp_190429_4 order by abtest,cast(sl as int);
 scp /data/jenkins/jobs/stg.tar.gz root@jenkins_new:/data/jenkins/jobs/
 scp -r /data/jenkins root@jenkins_new:/data/jenkins
 
-curl http://hadoop002:19888/jobhistory/attempts/job_1551780685180_261447/m/FAILED
+curl http://hadoop002:19888/jobhistory/attempts/job_1551780685180_455438/m/FAILED
 
 http://106.75.20.192/#/projects
 10.10.172.28
@@ -141,10 +141,14 @@ analytics-zcollect
 flink run -m yarn-cluster -c com.zdm.zyl.SdkToFlinkAggregations zyl-0.1.jar
 flink run -m yarn-cluster -c com.zdm.zyl.SdkToFlinkAggregations -yqu bi -p 24 -yn 8 -ys 8 -ytm 8192 zyl-0.1.jar &
 
+flink run -m yarn-cluster -c com.zdm.zyl.FlinkSet zyl-0.2.jar
+flink run -m yarn-cluster -c com.zdm.zyl.FlinkStreamTest zyl-0.2.jar &
+flink run -m yarn-cluster -c com.zdm.zyl.FlinkStreamTest -yqu bi -p 24 -yn 8 -ys 8 -ytm 8192 zyl-0.2.jar
+
  yarn-session.sh -n 4 -jm 1024 -tm 4096
 
-yarn logs -applicationId application_1551780685180_386311 > logs.txt
-yarn logs -applicationId application_1551780685180_380816
+yarn logs -applicationId application_1557901619354_0001 > logs.txt
+yarn logs -applicationId application_1557811118023_0008 > logs.txt
 
 cd /data/hadoop/yarn/log/		taskmanager.out
 ps -ef |grep 1554383939428_4618

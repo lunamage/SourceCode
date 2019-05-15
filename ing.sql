@@ -1,5 +1,7 @@
 select printf("%.6f",0.004833);
 
+HIVE Skewed Table
+
 stack
 translate
 trunc
