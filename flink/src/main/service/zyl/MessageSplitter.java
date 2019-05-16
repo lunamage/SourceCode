@@ -106,9 +106,7 @@ public class MessageSplitter extends RichFlatMapFunction<String, Tuple4<String, 
                     itemId = articleId.toString();
                 }
                 PropertyEntity property = getProperty(itemId);
-                log.debug("flatMap error"+property.toString());
                 if (property == null) {
-                	log.debug("bug");
                     return;}
                 if (!Strings.isNullOrEmpty(property.getCate())) {
                     for (String cate : property.getCate().split(",")) {
@@ -161,7 +159,8 @@ public class MessageSplitter extends RichFlatMapFunction<String, Tuple4<String, 
                 
             }
         } catch (Exception e) {
-            log.error("flatMap error msg is {} value is {}", e.getMessage(), msg);
+            log.error("flatMap error msg is {} value is {}", e.getMessage(), msg,e);
+            return;
         }
     }
 

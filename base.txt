@@ -145,9 +145,13 @@ flink run -m yarn-cluster -c com.zdm.zyl.FlinkSet zyl-0.2.jar
 flink run -m yarn-cluster -c com.zdm.zyl.FlinkStreamTest zyl-0.2.jar &
 flink run -m yarn-cluster -c com.zdm.zyl.FlinkStreamTest -yqu bi -p 24 -yn 8 -ys 8 -ytm 8192 zyl-0.2.jar
 
+redis-cli -h 10.9.31.154 -p 6379
+
+keys u1d*
+
  yarn-session.sh -n 4 -jm 1024 -tm 4096
 
-yarn logs -applicationId application_1557901619354_0001 > logs.txt
+yarn logs -applicationId application_1557901619354_0256 > logs.txt
 yarn logs -applicationId application_1557811118023_0008 > logs.txt
 
 cd /data/hadoop/yarn/log/		taskmanager.out
@@ -169,3 +173,9 @@ select a.id,a.user_id,b.smzdm_id
 from bi_test.zyl_tmp_190426 a
 left join (select * from stg.db_udc_account where dt='2019-04-25') b on a.user_id=b.user_id
 order by id;
+
+bitmp
+
+MSCK REPAIR TABLE flink_offline;
+
+alter table flink_offline set TBLPROPERTIES('EXTERNAL'='true')
