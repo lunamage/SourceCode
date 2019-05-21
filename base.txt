@@ -106,7 +106,7 @@ select jie('%E6%B7%98%E7%B3%BB');
 hadoop jar test_mr.jar MapReduce/JsonJobSubmitter /bi/test/test_json /bi/test/test_json_out
 
 rsync -av --progress /data/tmp/zhaoyulong/data/* root@10.9.16.199:/data/machinelearning/data/train_data_data
-rsync -av --progress tmp1027.sh bi@azkaban:/data/source/data_warehouse/ga/script/tmp/tmp1027.sh
+rsync -av --progress zyl-0.2.jar bi@azkaban:/data/source/data_warehouse/ga/jar/zyl-0.2.jar
 
 rsync -av --progress /data/feature_center_factory/purchasepower/* bi@azkaban:/data/feature_center_factory/purchasepower
 
@@ -127,6 +127,7 @@ ssh zhaoyulong@jumpserver-itoamms.smzdm.com -p 2222
 /usr/hdp/2.6.3.0-235/kafka/bin/kafka-topics.sh --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181 --create --topic zyltest --partitions 1  --replication-factor 1
 /usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-producer.sh --broker-list hadoop001:6667,hadoop002:6667,hadoop003:6667 --topic zyltest
 /usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --from-beginning
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --from-beginning|grep 5786557172|grep 搜索|grep 点击
 
 /usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --max-messages 10
 
@@ -143,15 +144,19 @@ flink run -m yarn-cluster -c com.zdm.zyl.SdkToFlinkAggregations -yqu bi -p 24 -y
 
 flink run -m yarn-cluster -c com.zdm.zyl.FlinkSet zyl-0.2.jar
 flink run -m yarn-cluster -c com.zdm.zyl.FlinkStreamTest zyl-0.2.jar &
-flink run -m yarn-cluster -c com.zdm.zyl.FlinkStreamTest -yqu bi -p 24 -yn 8 -ys 8 -ytm 8192 zyl-0.2.jar
+flink run -m yarn-cluster -c com.zdm.zyl.FlinkStreamTest -yqu bitmp -p 24 -yn 8 -ys 8 -ytm 8192 zyl-0.2.jar &
 
 redis-cli -h 10.9.31.154 -p 6379
+redis-cli -h 10.19.82.107 -p 6379
+
+redis-cli -h 10.9.15.111 -p 6379
+hgetall u1dimp_6030086746
 
 keys u1d*
 
  yarn-session.sh -n 4 -jm 1024 -tm 4096
 
-yarn logs -applicationId application_1557901619354_0256 > logs.txt
+yarn logs -applicationId application_1557901619354_0708 > logs.txt
 yarn logs -applicationId application_1557811118023_0008 > logs.txt
 
 cd /data/hadoop/yarn/log/		taskmanager.out

@@ -1,4 +1,4 @@
-package com.zdm.zyl;
+package main;
 
 
 import org.apache.flink.api.common.functions.FlatMapFunction;
@@ -24,6 +24,7 @@ import com.alibaba.fastjson.JSONObject;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import utils.ReadConfig;
 
 import java.io.IOException;
 import java.util.*;
@@ -40,14 +41,12 @@ public class FlinkSet {
 	
     private final static String IMP_LOG_STATUS = "\"type\":\"show\"";
     private final static String CLICK_LOG_STATUS = "\"type\":\"event\"";
-    
+
     public static void main(String[] args) throws Exception {
         // 任务名称
     	ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
-    	//线上 hdfs://cluster
-    	//测试 hdfs://hadoop-test
-    	
-        DataSet<String> hdfsLines = env.readTextFile(ReadConfig.getProperties("hdfs.prefix")+"/bi/app_ga/app_user_portrait_redis");
+       
+        DataSet<String> hdfsLines = env.readTextFile("hdfs://hadoop-test/bi/app_ga/app_user_portrait_redis");
         
         DataSet<Tuple3<String, String, String>> data = hdfsLines.flatMap(new Tokenizer());
         
@@ -55,7 +54,7 @@ public class FlinkSet {
 		
 		data.output(new OutputFormat<Tuple3<String, String, String>>() {
 
-            private JedisPool jedisPool;
+            private JedisPool pool;
             private Jedis jedis;
 
             @Override
@@ -73,28 +72,23 @@ public class FlinkSet {
                 // #jedis最大保存idel状态对象数 #
                 config.setMaxIdle(Integer.valueOf(ReadConfig.getProperties("jedis.pool.maxIdle")));
 
-                this.jedisPool = new JedisPool(config, ReadConfig.getProperties("redis.article.feature"),
+                this.pool = new JedisPool(config, ReadConfig.getProperties("redis.article.feature"),
                         Integer.valueOf(ReadConfig.getProperties("redis.port")),
                         Integer.valueOf(ReadConfig.getProperties("jedis.pool.timeout")));
-                
+                jedis = pool.getResource();
             }
             
             
             @Override
             public void writeRecord(Tuple3<String, String, String> tuple) throws IOException {
             	//log.info(tuple.f0+tuple.f1+String.valueOf(tuple.f2));
-            	try (Jedis jedis = jedisPool.getResource()) {
-                	jedis.hset(tuple.f0, tuple.f1, tuple.f2);
-                	jedis.expire(tuple.f0, 86400);
-            	}
-            	catch (Exception e) {
-                    log.error("redis error ", e.getMessage(), e);
-                }
+            	jedis.hset(tuple.f0, tuple.f1, tuple.f2);
+            	jedis.expire(tuple.f0, 86400);
             }
 
             @Override
             public void close() throws IOException {
-                //jedis.close();
+                jedis.close();
             }
         });
 		

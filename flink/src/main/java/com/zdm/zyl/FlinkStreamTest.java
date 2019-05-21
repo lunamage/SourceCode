@@ -53,7 +53,7 @@ public class FlinkStreamTest {
         env.enableCheckpointing(5000);
         Properties properties = new Properties();
         properties.setProperty("bootstrap.servers", ReadConfig.getProperties("bootstrap.servers"));
-        properties.setProperty("group.id", "zyl-feature");
+        properties.setProperty("group.id", "zyl-24hfeature");
 
         FlinkKafkaConsumer<String> myConsumer = new FlinkKafkaConsumer<>(ReadConfig.getProperties("kafka.topic"), new SimpleStringSchema(), properties);
         myConsumer.setStartFromLatest();
@@ -92,6 +92,7 @@ public class FlinkStreamTest {
     public static class CalEntity {
         public int imp = 0;
         public int click = 0;
+        public int s_click = 0;
     }
 
     public static class ItemFeatureEntity {
@@ -127,7 +128,8 @@ public class FlinkStreamTest {
 				String propertyItemId = entry.getKey();
 				String imp = String.valueOf(entry.getValue()[0]);
 				String click = String.valueOf(entry.getValue()[1]);
-				data=data+"{key:\""+propertyItemId+"\",imp:\""+imp+"\",click:\""+click+"\"},";
+				String s_click = String.valueOf(entry.getValue()[2]);
+				data=data+"{\"key\":\""+propertyItemId+"\",\"imp\":\""+imp+"\",\"click\":\""+click+"\",\"s_click\":\""+s_click+"\"},";
 			}
 			
 			return data.substring(0, data.length()-1) + "|" + windowEnd;
@@ -164,6 +166,9 @@ public class FlinkStreamTest {
             if (Objects.equals(val.f2, Utils.CLICK)) {
                 entity.get(val.f1).click += 1;
             }
+            if (Objects.equals(val.f2, "s_click")) {
+                entity.get(val.f1).s_click += 1;
+            }
             return entity;
         }
     }
@@ -178,9 +183,10 @@ public class FlinkStreamTest {
             for (Map.Entry<String, CalEntity> map : entity.entrySet()) {
                 Integer imp = map.getValue().imp;
                 Integer click = map.getValue().click;
+                Integer s_click = map.getValue().s_click;
                 //DecimalFormat df = new DecimalFormat("0.00000");
                 //Double ctr = imp == 0 ? null : Double.valueOf(df.format((float) click / imp));
-                val.put(map.getKey(), new Object[]{imp, click});
+                val.put(map.getKey(), new Object[]{imp, click, s_click});
             }
             collector.collect(ItemFeatureEntity.getEntity(userProxyId, val, DateUtils.formatDate(new Date(timeWindow.getEnd()), DateUtils.YYYYMMDD_HMS)));
         }

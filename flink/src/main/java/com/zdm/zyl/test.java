@@ -37,10 +37,10 @@ public class test {
 		//Map<String,String> ecp = JSONObject.parseObject(sdk.get("ecp"), Map.class);
 		//System.out.print(ecp.get("a"));
 		
-		String js="{\"imei\":\"\",\"aid\":\"com.smzdm.client.ios\",\"lng\":\"116.3807724925395\",\"sid\":\"15579727793595\",\"uid\":\"\",\"tid\":\"UA-1000000-1\",\"an\":\"smzdm\",\"ca\":\"0\",\"sr\":\"1242x2688\",\"ea\":\"01\",\"uuid\":\"AA2915F0-6B1C-4C28-943D-6B5DBDD66FEB\",\"ecp\":\"{\\\"p\\\":\\\"3\\\",\\\"sit\\\":\\\"1557972782914\\\",\\\"c\\\":\\\"1\\\",\\\"oos\\\":\\\"无\\\",\\\"25\\\":\\\"精选&值友专享\\\",\\\"40\\\":\\\"101_c,104_d,107_b,109_b,111_b,113_a,115_a,117_b,119_a,122_a,131_b,133_b,138_b,139_a,143_c,95_a,99_b\\\",\\\"11\\\":\\\"youhui\\\",\\\"tagID\\\":\\\"无\\\",\\\"1\\\":\\\"京东\\\",\\\"35\\\":\\\"a\\\",\\\"sp\\\":\\\"0\\\",\\\"ct\\\":\\\"24小时内-非同步到首页的国内\\\\\\/海淘数据\\\",\\\"13\\\":\\\"v\\\",\\\"tv\\\":\\\"v\\\",\\\"14\\\":\\\"5a201f91d763f74e5fb6e9293fbb0644\\\",\\\"atp\\\":\\\"3\\\",\\\"22\\\":\\\"非同步到首页-24\\\",\\\"5\\\":\\\"电脑数码\\\",\\\"ref\\\":\\\"启动APP\\\",\\\"6\\\":\\\"无\\\",\\\"7\\\":\\\"无\\\",\\\"pid\\\":\\\"5a201f91d763f74e5fb6e9293fbb0644\\\",\\\"ad\\\":\\\"2\\\",\\\"8\\\":\\\"无\\\",\\\"a\\\":\\\"13477291\\\",\\\"24\\\":\\\"普通\\\",\\\"9\\\":\\\"无\\\"}\",\"hnb\":\"4\",\"ec\":\"01\",\"type\":\"show\",\"ift\":\"0\",\"st\":\"iPhone\",\"v\":\"1.10\",\"isnp\":\"1\",\"ip\":\"210.12.11.20\",\"sv\":\"1.1.0\",\"dt\":\"1\",\"ds\":\"app\",\"m\":\"1cd3a91f940f3fd0598f1ab935339f48\",\"ch\":\"AppStore\",\"slt\":1557972788,\"av\":\"9.4.10.41\",\"it\":\"1557972782918\",\"cid\":\"st+HFt+MzksWL+ZZsugizmUFDRJRBHgCohhqAxWokpbGpbSitCNpfg==.1557972767279\",\"lat\":\"39.84980579706563\",\"idfa\":\"nsYea62x02FcmZsQCW343BBdK0g7znfqC\\/KdQslMF4rxOAef2uQxwA==\",\"did\":\"st+HFt+MzksWL+ZZsugizmUFDRJRBHgCohhqAxWokpbGpbSitCNpfg==\",\"dm\":\"iPhone11,6\",\"idfv\":\"oLP8XjJFhxMVIf4ePFEyurraWAcmkXxWQAAR+QOVMRuX6onga97+Qw==\",\"nt\":\"wifi\",\"os\":\"12.0\"}";
-		ImpLogEntity entity = JSONObject.parseObject(js, ImpLogEntity.class);
-		ItemEntity itemEntity = JSON.parseObject(entity.getEcp(), ItemEntity.class);
-		System.out.print(itemEntity.getItemId());
+		//String js="{\"imei\":\"\",\"aid\":\"com.smzdm.client.ios\",\"lng\":\"116.3807724925395\",\"sid\":\"15579727793595\",\"uid\":\"\",\"tid\":\"UA-1000000-1\",\"an\":\"smzdm\",\"ca\":\"0\",\"sr\":\"1242x2688\",\"ea\":\"01\",\"uuid\":\"AA2915F0-6B1C-4C28-943D-6B5DBDD66FEB\",\"ecp\":\"{\\\"p\\\":\\\"3\\\",\\\"sit\\\":\\\"1557972782914\\\",\\\"c\\\":\\\"1\\\",\\\"oos\\\":\\\"无\\\",\\\"25\\\":\\\"精选&值友专享\\\",\\\"40\\\":\\\"101_c,104_d,107_b,109_b,111_b,113_a,115_a,117_b,119_a,122_a,131_b,133_b,138_b,139_a,143_c,95_a,99_b\\\",\\\"11\\\":\\\"youhui\\\",\\\"tagID\\\":\\\"无\\\",\\\"1\\\":\\\"京东\\\",\\\"35\\\":\\\"a\\\",\\\"sp\\\":\\\"0\\\",\\\"ct\\\":\\\"24小时内-非同步到首页的国内\\\\\\/海淘数据\\\",\\\"13\\\":\\\"v\\\",\\\"tv\\\":\\\"v\\\",\\\"14\\\":\\\"5a201f91d763f74e5fb6e9293fbb0644\\\",\\\"atp\\\":\\\"3\\\",\\\"22\\\":\\\"非同步到首页-24\\\",\\\"5\\\":\\\"电脑数码\\\",\\\"ref\\\":\\\"启动APP\\\",\\\"6\\\":\\\"无\\\",\\\"7\\\":\\\"无\\\",\\\"pid\\\":\\\"5a201f91d763f74e5fb6e9293fbb0644\\\",\\\"ad\\\":\\\"2\\\",\\\"8\\\":\\\"无\\\",\\\"a\\\":\\\"13477291\\\",\\\"24\\\":\\\"普通\\\",\\\"9\\\":\\\"无\\\"}\",\"hnb\":\"4\",\"ec\":\"01\",\"type\":\"show\",\"ift\":\"0\",\"st\":\"iPhone\",\"v\":\"1.10\",\"isnp\":\"1\",\"ip\":\"210.12.11.20\",\"sv\":\"1.1.0\",\"dt\":\"1\",\"ds\":\"app\",\"m\":\"1cd3a91f940f3fd0598f1ab935339f48\",\"ch\":\"AppStore\",\"slt\":1557972788,\"av\":\"9.4.10.41\",\"it\":\"1557972782918\",\"cid\":\"st+HFt+MzksWL+ZZsugizmUFDRJRBHgCohhqAxWokpbGpbSitCNpfg==.1557972767279\",\"lat\":\"39.84980579706563\",\"idfa\":\"nsYea62x02FcmZsQCW343BBdK0g7znfqC\\/KdQslMF4rxOAef2uQxwA==\",\"did\":\"st+HFt+MzksWL+ZZsugizmUFDRJRBHgCohhqAxWokpbGpbSitCNpfg==\",\"dm\":\"iPhone11,6\",\"idfv\":\"oLP8XjJFhxMVIf4ePFEyurraWAcmkXxWQAAR+QOVMRuX6onga97+Qw==\",\"nt\":\"wifi\",\"os\":\"12.0\"}";
+		//ImpLogEntity entity = JSONObject.parseObject(js, ImpLogEntity.class);
+		//ItemEntity itemEntity = JSON.parseObject(entity.getEcp(), ItemEntity.class);
+		//System.out.print(itemEntity.getItemId());
 		
 		//System.out.print(Pattern.compile("^推荐_").matcher("推荐_asasas").find());
 		
@@ -82,8 +82,17 @@ public class test {
 		
 		
 		
-
-        
+		/*String propertyItemId="1234567890";
+		String imp = "1";
+		String click = "2";
+		String s_click = "3";
+		String data="{\"key\":\""+propertyItemId+"\",\"imp\":\""+imp+"\",\"click\":\""+click+"\",\"s_click\":\""+s_click+"\"},";
+		System.out.print(data);*/
+		
+		//System.out.print(ReadConfig.getProperties("hdfs.prefix")+"/bi/app_ga/app_user_portrait_redis");
+		
+		String ITEM_BASE_INFO = "ib_%s_%s";
+		System.out.print(String.format(ITEM_BASE_INFO, "123456", 3));
 		
 		
 		
