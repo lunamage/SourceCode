@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import main.Hashids;
-import main.Utils;
 import model.ImpLogEntity;
 import model.ItemEntity;
 import model.PropertyEntity;
@@ -21,6 +20,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import utils.DateUtils;
 import utils.ReadConfig;
+import utils.Utils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
