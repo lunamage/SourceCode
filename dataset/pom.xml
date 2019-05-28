@@ -5,7 +5,7 @@
 
   <groupId>com.zdm</groupId>
   <artifactId>DataSet</artifactId>
-  <version>0.1</version>
+  <version>1.0</version>
   <packaging>jar</packaging>
 
     <name>Flink Quickstart Job</name>

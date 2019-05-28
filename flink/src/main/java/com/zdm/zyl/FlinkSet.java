@@ -24,6 +24,9 @@ import com.alibaba.fastjson.JSONObject;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisShardInfo;
+import redis.clients.jedis.ShardedJedis;
+import redis.clients.jedis.ShardedJedisPool;
 
 import java.io.IOException;
 import java.util.*;
@@ -55,8 +58,8 @@ public class FlinkSet {
 		
 		data.output(new OutputFormat<Tuple3<String, String, String>>() {
 
-            private JedisPool jedisPool;
-            private Jedis jedis;
+            private ShardedJedisPool jedisPool;
+            //private Jedis jedis;
 
             @Override
             public void configure(Configuration configuration) {
@@ -73,9 +76,15 @@ public class FlinkSet {
                 // #jedis最大保存idel状态对象数 #
                 config.setMaxIdle(Integer.valueOf(ReadConfig.getProperties("jedis.pool.maxIdle")));
 
-                this.jedisPool = new JedisPool(config, ReadConfig.getProperties("redis.article.feature"),
-                        Integer.valueOf(ReadConfig.getProperties("redis.port")),
-                        Integer.valueOf(ReadConfig.getProperties("jedis.pool.timeout")));
+                //this.jedisPool = new JedisPool(config, ReadConfig.getProperties("redis.article.feature"),
+                //        Integer.valueOf(ReadConfig.getProperties("redis.port")),
+                //        Integer.valueOf(ReadConfig.getProperties("jedis.pool.timeout")));
+                
+                List<JedisShardInfo> rtShard = Arrays.asList(
+                        new JedisShardInfo(ReadConfig.getProperties("redis.rt.article.m1"), Integer.valueOf(ReadConfig.getProperties("redis.port")), Integer.valueOf(ReadConfig.getProperties("jedis.pool.timeout"))),
+                        new JedisShardInfo(ReadConfig.getProperties("redis.rt.article.m2"), Integer.valueOf(ReadConfig.getProperties("redis.port")), Integer.valueOf(ReadConfig.getProperties("jedis.pool.timeout"))));
+
+                this.jedisPool = new ShardedJedisPool(config, rtShard);
                 
             }
             
@@ -83,7 +92,7 @@ public class FlinkSet {
             @Override
             public void writeRecord(Tuple3<String, String, String> tuple) throws IOException {
             	//log.info(tuple.f0+tuple.f1+String.valueOf(tuple.f2));
-            	try (Jedis jedis = jedisPool.getResource()) {
+            	try (ShardedJedis jedis = jedisPool.getResource()) {
                 	jedis.hset(tuple.f0, tuple.f1, tuple.f2);
                 	jedis.expire(tuple.f0, 86400);
             	}

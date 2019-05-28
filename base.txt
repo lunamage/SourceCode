@@ -40,13 +40,15 @@ ALTER TABLE stg_ga_original_data ADD PARTITION (dt='2015-10-16') location '/bi/s
 hive --hiveconf hive.execution.engine=mr -e "use stg; ALTER TABLE db_baoliao_baoliao_evaluate DROP IF EXISTS PARTITION (dt='$tx_date');"
 hive --hiveconf hive.execution.engine=mr -e "use stg; ALTER TABLE db_baoliao_baoliao_evaluate ADD PARTITION (dt='$tx_date') LOCATION '/bi/stg/db_baoliao_baoliao_evaluate/$tx_date';"
 
+alter table db_commonadmin_comment_data drop partition (dt='2019-05-22');
+
 insert overwrite local directory '/data/tmp/zhaoyulong/data' row format delimited fields terminated by '\t'
 select *from bi_test.zyl_tmp_190429_4 order by abtest,cast(sl as int);
 
 scp /data/jenkins/jobs/stg.tar.gz root@jenkins_new:/data/jenkins/jobs/
 scp -r /data/jenkins root@jenkins_new:/data/jenkins
 
-curl http://hadoop002:19888/jobhistory/attempts/job_1551780685180_455438/m/FAILED
+curl http://hadoop002:19888/jobhistory/attempts/job_1551780685180_530602/m/FAILED
 
 http://106.75.20.192/#/projects
 10.10.172.28
@@ -146,7 +148,9 @@ flink run -m yarn-cluster -c com.zdm.zyl.FlinkSet zyl-0.2.jar
 flink run -m yarn-cluster -c com.zdm.zyl.FlinkStreamTest zyl-0.2.jar &
 flink run -m yarn-cluster -c com.zdm.zyl.FlinkStreamTest -yqu bitmp -p 24 -yn 8 -ys 8 -ytm 8192 zyl-0.2.jar &
 
+#test
 redis-cli -h 10.9.31.154 -p 6379
+#online
 redis-cli -h 10.19.82.107 -p 6379
 
 redis-cli -h 10.9.15.111 -p 6379
