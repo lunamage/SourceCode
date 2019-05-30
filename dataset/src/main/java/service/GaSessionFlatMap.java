@@ -18,7 +18,8 @@ public class GaSessionFlatMap implements FlatMapFunction<String,GaSession>{
 			GaSession gaSession = JSONObject.parseObject(msg, GaSession.class);
 			collector.collect(gaSession);
 			} catch (Exception e) {
-                log.error("flatMap error msg is {} value is {}", e.getMessage(), msg);
+                log.error("flatMap error msg is {} value is {}", e.getMessage(), msg,e);
+                return;
             }
         	
 	}

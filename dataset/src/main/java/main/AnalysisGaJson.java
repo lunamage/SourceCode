@@ -7,7 +7,12 @@ import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.core.fs.FileSystem.WriteMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import model.GaHits;
+import model.GaHitsCustomDimensions;
 import model.GaSession;
+import service.GaHitsCustomDimensionsFlatMap;
+import service.GaHitsFlatMap;
 import service.GaSessionFlatMap;
 
 /**
@@ -29,8 +34,17 @@ public class AnalysisGaJson {
         DataSet<String> hdfsLines = env.readTextFile("hdfs://cluster/bi/stg_ga/stg_ga_clean_data/dt="+txdate);
         
         //
-        DataSet<GaSession> gasession = hdfsLines.flatMap(new GaSessionFlatMap());
-        gasession.writeAsText("hdfs://cluster/bi/ods_ga/ods_ga_sessions_data_test/dt="+txdate, WriteMode.OVERWRITE);
+        DataSet<GaSession> gaSession = hdfsLines.flatMap(new GaSessionFlatMap());
+        gaSession.writeAsText("hdfs://cluster/bi/ods_ga/ods_ga_sessions_data_test/dt="+txdate, WriteMode.OVERWRITE);
+        
+        DataSet<GaHits> gaHits = hdfsLines.flatMap(new GaHitsFlatMap());
+        gaHits.writeAsText("hdfs://cluster/bi/ods_ga/ods_ga_hits_data_test/dt="+txdate, WriteMode.OVERWRITE);
+        
+        DataSet<GaHitsCustomDimensions> gaHitsCustomDimensions = hdfsLines.flatMap(new GaHitsCustomDimensionsFlatMap());
+        gaHitsCustomDimensions.writeAsText("hdfs://cluster/bi/ods_ga/ods_ga_hits_customDimensions_data_test/dt="+txdate, WriteMode.OVERWRITE);
+        
+        //DataSet<GaHitsCustomDimensions> gaHitsCustomDimensions1 = hdfsLines.flatMap(new GaHitsCustomDimensionsFlatMap());
+        //gaHitsCustomDimensions1.writeAsText("hdfs://cluster/bi/dw_ga/fact_ga_hits_data_test/dt="+txdate, WriteMode.OVERWRITE);
         
         env.execute("Run_flink_1d");
     }

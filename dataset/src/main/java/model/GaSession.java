@@ -3,14 +3,9 @@ package model;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import service.GaSessionFlatMap;
 
 public class GaSession {
-	
-	//private static Logger log = LoggerFactory.getLogger(GaSession.class);
 	
 	private String fullVisitorId;
     private String visitId;

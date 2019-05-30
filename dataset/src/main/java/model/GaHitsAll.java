@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class GaHits {
+public class GaHitsAll {
 	
 	private String fullVisitorId;
     private String visitId;

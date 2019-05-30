@@ -19,7 +19,8 @@ public class GaHitsFlatMap implements FlatMapFunction<String,GaHits>{
 			GaHits gaHits = JSONObject.parseObject(msg, GaHits.class);
 			collector.collect(gaHits);
 			} catch (Exception e) {
-                log.error("flatMap error msg is {} value is {}", e.getMessage(), msg);
+                log.error("flatMap error msg is {} value is {}", e.getMessage(), msg,e);
+                return;
             }
         	
 	}
