@@ -39,7 +39,7 @@ sum(if(b.price<1000,1,0))/count(*) bl4
 from(
 select a.dt,a.article_id,a.abtest,a.device_id
 from bi_dw_ga.fact_recsys_display_data_sdk a
-where a.dt between '2019-05-20' and '2019-05-28') a
+where a.dt between '2019-05-30' and '2019-05-30') a
 left join tmp_article b on a.article_id=b.id
 group by a.dt,a.abtest;
 
@@ -59,7 +59,7 @@ sum(if(b.price<1000,1,0))/count(*) bl4
 from(
 select a.dt,regexp_extract(a.hits_eventinfo_eventlabel,'推荐_([^_]+)_([^_]+)',2) article_id,a.dim49 abtest,a.fullvisitorid device_id
 from bi_dw_ga.fact_ga_hits_data a
-where a.dt between '2019-05-20' and '2019-05-28' and (a.hits_appinfo_appid='com.smzdm.client.android' or a.hits_appinfo_appid='com.smzdm.client.ios')
+where a.dt between '2019-05-30' and '2019-05-30' and (a.hits_appinfo_appid='com.smzdm.client.android' or a.hits_appinfo_appid='com.smzdm.client.ios')
 and a.hits_eventinfo_eventcategory ='首页' and a.hits_eventinfo_eventaction='首页站内文章点击' and a.hits_eventinfo_eventlabel regexp '^推荐' and a.hits_appinfo_appversion regexp '^8.(7|8|9)|^9.') a
 left join tmp_article b on a.article_id=b.id
 group by a.dt,a.abtest;
@@ -67,7 +67,7 @@ group by a.dt,a.abtest;
 create table bi_test.zyl_tmp_190529_7 as
 select dt,mall,abtest,count(*) sl,count(distinct device_id) sl2,count(distinct article_id) sl3
 from bi_dw_ga.fact_recsys_display_data_sdk a
-where a.dt between '2019-05-20' and '2019-05-28'
+where a.dt between '2019-05-30' and '2019-05-30'
 group by dt,mall,abtest;
 
 
@@ -78,8 +78,33 @@ insert overwrite local directory '/data/tmp/zhaoyulong/data' row format delimite
 select * from bi_test.zyl_tmp_190529_6 order by dt,abtest;
 
 insert overwrite local directory '/data/tmp/zhaoyulong/data' row format delimited fields terminated by '\t'
-select * from bi_test.zyl_tmp_190529_7 order by dt,abtest;
+select * from bi_test.zyl_tmp_190529_7 order by dt,abtest
 
+
+create table bi_test.zyl_tmp_190530_1 as
+select a.dt,
+a.stat_hour,
+a.abtest,
+count(*) bg,
+count(distinct a.device_id) user,
+count(distinct a.device_id,b.cate_level3) user_cate3,
+count(distinct a.device_id,b.cate_level2) user_cate2,
+count(distinct a.device_id,b.cate_level1) user_cate1,
+avg(b.price) avg_price,
+sum(if(b.price<20,1,0))/count(*) bl1,
+sum(if(b.price<100,1,0))/count(*) bl2,
+sum(if(b.price<500,1,0))/count(*) bl3,
+sum(if(b.price<1000,1,0))/count(*) bl4
+from(
+select a.dt,a.article_id,a.abtest,a.device_id,a.stat_hour
+from bi_dw_ga.fact_recsys_display_data_sdk a
+where a.dt between '2019-05-27' and '2019-05-29') a
+left join tmp_article b on a.article_id=b.id
+group by a.dt,a.stat_hour,a.abtest;
+
+
+insert overwrite local directory '/data/tmp/zhaoyulong/data' row format delimited fields terminated by '\t'
+select * from bi_test.zyl_tmp_190530_1 order by dt,abtest;
 
 
 /*字段名	解释

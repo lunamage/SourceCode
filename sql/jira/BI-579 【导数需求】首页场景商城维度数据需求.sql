@@ -187,7 +187,7 @@ select pubdate,
 nvl(mall,'其他') mall,
 nvl(cate_level1,'其他') cate_level1,
 count(*) sl
-from (select id,channel_id,cate_level1,cate_level2,cate_level3,cast(price as double) price,mall,to_date(pubdate) pubdate from bi_dw_ga.dim_article_info where channel_id in('1','2','5') and to_date(pubdate) in('2018-06-01','2018-06-18','2018-11-01','2018-11-11','2019-05-24')) a
+from (select id,channel_id,cate_level1,cate_level2,cate_level3,cast(price as double) price,mall,to_date(pubdate) pubdate from bi_dw_ga.dim_article_info where channel_id in('1','5') and to_date(pubdate) in('2018-06-01','2018-06-18','2018-11-01','2018-11-11','2019-05-24')) a
 group by pubdate,nvl(mall,'其他'),nvl(cate_level1,'其他');
 
 
@@ -207,7 +207,7 @@ when price>2000 and price<=5000 then '(2000,5000]'
 when price>5000 and price<=10000 then '(5000,10000]'
 when price>10000 then '10000+' else '其他' end price_range,
 count(*) sl
-from (select id,channel_id,cate_level1,cate_level2,cate_level3,cast(price as double) price,mall,to_date(pubdate) pubdate from bi_dw_ga.dim_article_info where channel_id in('1','2','5') and to_date(pubdate) in('2018-06-01','2018-06-18','2018-11-01','2018-11-11','2019-05-24')) a
+from (select id,channel_id,cate_level1,cate_level2,cate_level3,cast(price as double) price,mall,to_date(pubdate) pubdate from bi_dw_ga.dim_article_info where channel_id in('1','5') and to_date(pubdate) in('2018-06-01','2018-06-18','2018-11-01','2018-11-11','2019-05-24')) a
 group by pubdate,nvl(mall,'其他'),case when price=0 then '0'
 when price>0 and price<=20 then '(0,20]'
 when price>20 and price<=50 then '(20,50]'
