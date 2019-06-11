@@ -56,6 +56,7 @@ public class FlinkStreamTest {
         properties.setProperty("group.id", "zyl-24hfeature");
 
         FlinkKafkaConsumer<String> myConsumer = new FlinkKafkaConsumer<>(ReadConfig.getProperties("kafka.topic"), new SimpleStringSchema(), properties);
+        
         myConsumer.setStartFromLatest();
         //SingleOutputStreamOperator<ItemFeatureEntity> 
         DataStream<ItemFeatureEntity> r = env.addSource(myConsumer)

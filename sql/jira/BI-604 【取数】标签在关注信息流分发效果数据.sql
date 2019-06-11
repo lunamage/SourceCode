@@ -123,11 +123,11 @@ group by a.dt,c.name;
 
 
 --5.曝光规则:    ec='02' 且 ea in (‘01’，‘02’）取ecp中rn作为本需求中的标签。取ecp中atp='3',取ecp中a作为文章id,app版本限制在9.3.20及以上
-select b.rn
+select a.dt,b.rn
 from bi_ods_ga.ods_app_sdk_log a
 lateral view json_tuple(a.ecp,'rn','atp') b as rn,atp
-where a.dt between '2019-06-04' and '2019-06-04' 
-and a.ec='02' and a.ea in('01','02') and a.av regexp '^9.3.2[0-9]|^9.3.[3-9]|^9.[4-9]' and b.atp='3' limit 15;
+where a.dt between '2019-05-04' and '2019-06-05'
+and a.ec='02' and a.ea in('01','02') and a.av regexp '^9.3.2[0-9]|^9.3.[3-9]|^9.[4-9]' and b.atp='3';
 
 
 

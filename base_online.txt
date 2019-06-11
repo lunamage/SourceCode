@@ -1,0 +1,98 @@
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-topics.sh --zookeeper zk01:2181,zk02:2181,zk03:2181 --list
+
+京东联盟
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh --zookeeper zk01:2181,zk02:2181,zk03:2181 --topic stream-orders-jdm --from-beginning|less
+京东开普勒
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh --zookeeper zk01:2181,zk02:2181,zk03:2181 --topic stream-orders-jd --from-beginning|less
+淘系联盟
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh --zookeeper zk01:2181,zk02:2181,zk03:2181 --topic stream-orders-tmm --from-beginning|less
+淘系百川
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh --zookeeper zk01:2181,zk02:2181,zk03:2181 --topic stream-orders-tm --from-beginning|less
+
+
+
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-topics.sh --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181 --describe --topic app-sdk-log
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-topics.sh --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181 --create --topic zyltest --partitions 1  --replication-factor 1
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-producer.sh --broker-list hadoop001:6667,hadoop002:6667,hadoop003:6667 --topic zyltest
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --from-beginning
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --from-beginning|grep 5786557172|grep 搜索|grep 点击
+
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --max-messages 10
+
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-run-class.sh kafka.tools.ConsumerOffsetChecker
+
+{"imei":"123","aid":"com.smzdm.client.ios","lng":"117.1219331955941","sid":"15535788371060","uid":"234891237","tid":"UA-1000000-1","an":"smzdm","ca":"0","sr":"1125x2436","uuid":"39BEE7FF-AC4E-4048-9CDD-124676B0B73E","ecp":"{\"tv\":\"a\",\"sp\":\"0\",\"a\":\"123456\",\"17\":\"a\",\"13\":\"a\",\"21\":\"首页_推荐_feed流_a_首页强制置顶\",\"20\":\"3\",\"11\":\"youhui\"}","idfa":"1MgqjeT41eINeS+IAsBZE+kJt5H9fZBdkvcqjYaDTdSfofPO6MzmDg==","type":"screenview","ift":"0","st":"iPhone","sn":"iPhone\/3\/12967582\/","v":"1.10","isnp":"1","ip":"117.50.12.220","sv":"1.1.0","dt":"1","ds":"app","ch":"AppStore","slt":1553579109,"av":"9.3.15","it":"1553579081445","cid":"VkF\/KKe4KaP\/oEDFDjcvOpRVnmK8FdfiyHmZNngjnTL1CSKIgp9s7g==.1552356749870","lat":"39.09510244436872","dm":"iPhone10,3","did":"VkF\/KKe4KaP\/oEDFDjcvOpRVnmK8FdfiyHmZNngjnTL1CSKIgp9s7g==","hnb":"54","os":"12.1","nt":"wifi","idfv":"eUJ9EhWsh\/SvKKbrkXrSYrHZhS0mpnkOgomb9kJfDgMkwUIWzBkUpg==","ec":"01","ea":"01","el":"推荐_asas"}
+{"imei":"123","aid":"com.smzdm.client.ios","lng":"117.1219331955941","sid":"15535788371060","uid":"234891237","tid":"UA-1000000-1","an":"smzdm","ca":"0","sr":"1125x2436","uuid":"39BEE7FF-AC4E-4048-9CDD-124676B0B73E","ecp":"{\"tv\":\"a\",\"sp\":\"0\",\"a\":\"123456\",\"17\":\"a\",\"13\":\"b\",\"21\":\"首页_推荐_feed流_a_首页强制置顶\",\"20\":\"3\",\"11\":\"youhui\"}","idfa":"1MgqjeT41eINeS+IAsBZE+kJt5H9fZBdkvcqjYaDTdSfofPO6MzmDg==","type":"screenview","ift":"0","st":"iPhone","sn":"iPhone\/3\/12967582\/","v":"1.10","isnp":"1","ip":"117.50.12.220","sv":"1.1.0","dt":"1","ds":"app","ch":"AppStore","slt":1553579109,"av":"9.3.15","it":"1553579081445","cid":"VkF\/KKe4KaP\/oEDFDjcvOpRVnmK8FdfiyHmZNngjnTL1CSKIgp9s7g==.1552356749870","lat":"39.09510244436872","dm":"iPhone10,3","did":"VkF\/KKe4KaP\/oEDFDjcvOpRVnmK8FdfiyHmZNngjnTL1CSKIgp9s7g==","hnb":"54","os":"12.1","nt":"wifi","idfv":"eUJ9EhWsh\/SvKKbrkXrSYrHZhS0mpnkOgomb9kJfDgMkwUIWzBkUpg==","ec":"首页","ea":"首页站内文章点击","el":"推荐_asas"}
+{"imei":"123","aid":"com.smzdm.client.ios","lng":"117.1219331955941","sid":"15535788371060","uid":"234891237","tid":"UA-1000000-1","an":"smzdm","ca":"0","sr":"1125x2436","uuid":"39BEE7FF-AC4E-4048-9CDD-124676B0B73E","ecp":"{\"tv\":\"a\",\"sp\":\"0\",\"a\":\"123456\",\"17\":\"a\",\"13\":\"b\",\"21\":\"首页_推荐_feed流_a_首页强制置顶\",\"20\":\"3\",\"11\":\"youhui\"}","idfa":"1MgqjeT41eINeS+IAsBZE+kJt5H9fZBdkvcqjYaDTdSfofPO6MzmDg==","type":"screenview","ift":"0","st":"iPhone","sn":"iPhone\/3\/12967582\/","v":"1.10","isnp":"1","ip":"117.50.12.220","sv":"1.1.0","dt":"1","ds":"app","ch":"AppStore","slt":1553579109,"av":"9.3.15","it":"1553579081445","cid":"VkF\/KKe4KaP\/oEDFDjcvOpRVnmK8FdfiyHmZNngjnTL1CSKIgp9s7g==.1552356749870","lat":"39.09510244436872","dm":"iPhone10,3","did":"VkF\/KKe4KaP\/oEDFDjcvOpRVnmK8FdfiyHmZNngjnTL1CSKIgp9s7g==","hnb":"54","os":"12.1","nt":"wifi","idfv":"eUJ9EhWsh\/SvKKbrkXrSYrHZhS0mpnkOgomb9kJfDgMkwUIWzBkUpg==","ec":"增强型电子商务","ea":"添加到购物车","el":"推荐_asas"}
+
+analytics-zcollect
+
+#推荐实时报表
+flink run -m yarn-cluster -c com.zdm.zyl.SdkToFlinkAggregations -yqu bi -ynm ctr_report -p 24 -yn 8 -ys 8 -ytm 8192 zyl-0.1.jar &
+#24H特征
+flink run -m yarn-cluster -c com.zdm.zyl.FlinkStreamTest -yqu bitmp -ynm 24H_ctr -yjm 6144 -p 24 -yn 24 -ys 8 -ytm 8192 zyl-0.2.jar &
+#推荐实时olap
+flink run -m yarn-cluster -c main.SdkGroupArticleId -yqu bi -ynm ctr_olap -p 24 -yn 8 -ys 8 -ytm 8192 datastream-1.0.jar &
+
+
+#test
+flink run -m yarn-cluster -c com.zdm.zyl.FlinkSet zyl-0.2.jar
+flink run -m yarn-cluster -c com.zdm.zyl.FlinkStreamTest zyl-0.2.jar &
+
+#dataset
+flink run -m yarn-cluster -c main.AnalysisSDKJson -yqu bi -ynm AnalysisSDKJson -yjm 4096 -p 200 -yn 200 -ys 24 -ytm 40960 DataSet-1.0.jar 2019-05-28
+flink run -m yarn-cluster -c main.AnalysisSDKJson -yqu bi -ynm AnalysisSDKJson -yjm 4096 -p 100 -yn 100 -ys 24 -ytm 40960 DataSet-1.0.jar
+
+
+#test
+redis-cli -h 10.9.31.154 -p 6379
+#online
+redis-cli -h 10.19.82.107 -p 6379
+
+redis-cli -h 10.9.15.111 -p 6379
+hgetall u1dimp_6030086746
+
+keys u1d
+
+redis-cli -h 10.19.82.107 -p 6379
+
+ yarn-session.sh -n 4 -jm 1024 -tm 4096
+
+yarn logs -applicationId application_1551780685180_602737 > logs.txt
+yarn logs -applicationId application_1551780685180_640156 > logs.txt
+
+
+yarn application -kill application_1551780685180_522125
+rm /data/source/data_warehouse/ga/jar/zyl-0.2.jar
+mv zyl-0.2.jar /data/source/data_warehouse/ga/jar/zyl-0.2.jar
+cd /data/source/data_warehouse/ga/jar
+flink run -m yarn-cluster -c com.zdm.zyl.FlinkStreamTest -yqu bitmp -p 24 -yn 8 -ys 8 -ytm 8192 zyl-0.2.jar &
+rsync -av --progress zyl-0.2.jar bi@azkaban:/data/source/data_warehouse/ga/jar/zyl-0.2.jar
+
+
+
+cd /data/hadoop/yarn/log/		taskmanager.out
+ps -ef |grep 1554383939428_4618
+
+
+vim /data/source/data_warehouse/ml_recsys2/rec_sh/preference_all_redis.sh
+vim /data/source/data_warehouse/ml_recsys2/rec_sh/preference_all_redis.py
+
+---------------
+CREATE EXTERNAL TABLE `zyl_tmp_190426`(
+  `id` int,
+  `user_id` string)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
+LOCATION 'hdfs://cluster/bi/test/zyl_tmp_190426';
+
+insert overwrite local directory '/data/tmp/zhaoyulong/data' row format delimited fields terminated by '\t'
+select a.id,a.user_id,b.smzdm_id
+from bi_test.zyl_tmp_190426 a
+left join (select * from stg.db_udc_account where dt='2019-04-25') b on a.user_id=b.user_id
+order by id;
+
+bitmp
+
+MSCK REPAIR TABLE flink_offline;
+
+alter table flink_offline set TBLPROPERTIES('EXTERNAL'='true')

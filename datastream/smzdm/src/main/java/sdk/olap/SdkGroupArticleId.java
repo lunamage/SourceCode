@@ -1,4 +1,4 @@
-package main;
+package sdk.olap;
 
 
 import org.apache.flink.api.common.functions.AggregateFunction;
@@ -20,7 +20,6 @@ import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import service.SdkGroupArticleIdSplitter;
 import utils.ReadConfig;
 
 import java.time.ZoneId;
