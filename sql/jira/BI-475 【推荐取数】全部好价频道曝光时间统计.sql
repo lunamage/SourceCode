@@ -34,11 +34,10 @@ where r in(500,1000)
 group by id;
 
 insert overwrite local directory '/data/tmp/zhaoyulong/data' row format delimited fields terminated by '\t'
-select b.pubdate,a.id,b.channel,c.sl,d.it_500,d.it_1000
-from bi_test.zyl_tmp_190606_1 a
+select b.pubdate,a.id,b.channel,a.sl,d.it_500,d.it_1000
+from bi_test.zyl_tmp_190606_2 a
 inner join(
 select id,channel,pubdate
 from bi_dw_ga.dim_article_info
 where channel_id in('1','2','5') and pubdate between '2019-05-20' and '2019-06-05 23:59:59') b on a.id=b.id
-inner join bi_test.zyl_tmp_190606_2 c on a.id=c.id
-inner join bi_test.zyl_tmp_190606_3 d on a.id=d.id;
+inner join bi_test.zyl_tmp_190606_3 d on a.id=d.id order by pubdate;

@@ -48,7 +48,7 @@ select *from bi_test.zyl_tmp_190429_4 order by abtest,cast(sl as int);
 scp /data/jenkins/jobs/stg.tar.gz root@jenkins_new:/data/jenkins/jobs/
 scp -r /data/jenkins root@jenkins_new:/data/jenkins
 
-curl http://hadoop002:19888/jobhistory/attempts/job_1551780685180_604656/m/FAILED
+curl http://hadoop002:19888/jobhistory/attempts/job_1551780685180_704760//m/FAILED
 
 http://106.75.20.192/#/projects
 10.10.172.28
@@ -172,7 +172,7 @@ redis-cli -h 10.19.82.107 -p 6379
 
  yarn-session.sh -n 4 -jm 1024 -tm 4096
 
-yarn logs -applicationId application_1551780685180_602737 > logs.txt
+yarn logs -applicationId application_1551780685180_633199 > logs.txt
 yarn logs -applicationId application_1551780685180_640156 > logs.txt
 
 
@@ -210,3 +210,6 @@ bitmp
 MSCK REPAIR TABLE flink_offline;
 
 alter table flink_offline set TBLPROPERTIES('EXTERNAL'='true')
+
+ALTER TABLE bi_ods_ga.ods_app_sdk_log ADD COLUMNS (isnp String COMMENT '画像新用户');
+ALTER TABLE bi_ods_ga.ods_app_sdk_log DROP IF EXISTS PARTITION (dt='2019-06-11');

@@ -97,7 +97,7 @@ select '食客' name union all
 select '燃' name union all
 select '家电研究所' name;
 
-cache table tmp_gz as
+create table bi_test.zyl_tmp_190611_1 as
 select a.dt,a.keyword,a.ljgz,a.yx_count
 from (select dt,keyword,ljgz,yx_count from bi_app_ga.app_dingyue_keyword_summary where dt between '2019-05-04' and '2019-05-10' and type='tag'
 union all
@@ -109,41 +109,65 @@ select dt,keyword,ljgz,yx_count from bi_app_ga.app_dingyue_keyword_summary where
 union all
 select dt,keyword,ljgz,yx_count from bi_app_ga.app_dingyue_keyword_summary where dt between '2019-06-02' and '2019-06-05' and type='tag'
 ) a
-inner join tmp_tags b on a.keyword=b.name;
+inner join tmp_tags b on a.keyword=b.name
+order by dt,keyword;
 
 
 
-cache table tmp_article as
+create table bi_test.zyl_tmp_190611_2 as
 select a.dt,c.name keyword,count(*) sl,sum(d.pv) pv,sum(d.event) event
 from (select id,to_date(pubdate) dt from stg.db_youhui_youhui where dt='2019-06-05' and pubdate between '2019-05-04' and concat('2019-06-05',' 23:59:59') and channel in(1,2,5) and yh_status=1) a
 inner join (select article_id,tag_id from stg.db_youhui_youhui_tag_type_item where dt='2019-06-05') b on a.id=b.article_id
 inner join (select id,name from stg.db_smzdm_smzdm_tag_type where dt='2019-06-05') c on b.tag_id=c.id
 left join (select article_id,sum(pc_pv+wap_pv+app_pv) pv,sum(pc_event+wap_event+app_event) event from bi_dw_ga.fact_ga_article_flow_summary where dt='2019-06-05' and dim='youhui' group by article_id) d on a.id=d.article_id
+inner join tmp_tags e on c.name=e.name
 group by a.dt,c.name;
 
 
 --5.曝光规则:    ec='02' 且 ea in (‘01’，‘02’）取ecp中rn作为本需求中的标签。取ecp中atp='3',取ecp中a作为文章id,app版本限制在9.3.20及以上
-select a.dt,b.rn
+create table bi_test.zyl_tmp_190611_3 as
+select a.dt,a.rn keyword,a.sl bgl,a.asl
+from(
+select a.dt,b.rn,count(*) sl,count(distinct b.a) asl
 from bi_ods_ga.ods_app_sdk_log a
-lateral view json_tuple(a.ecp,'rn','atp') b as rn,atp
+lateral view json_tuple(a.ecp,'rn','atp','a') b as rn,atp,a
 where a.dt between '2019-05-04' and '2019-06-05'
-and a.ec='02' and a.ea in('01','02') and a.av regexp '^9.3.2[0-9]|^9.3.[3-9]|^9.[4-9]' and b.atp='3';
+and a.ec='02' and a.ea in('01','02') and a.av regexp '^9.3.2[0-9]|^9.3.[3-9]|^9.[4-9]' and b.atp='3'
+group by a.dt,b.rn) a
+inner join tmp_tags b on a.rn=b.name;
+
+--3.关注信息流点击数：GA埋点规则
+--事件类别：关注
+--事件操作：首页关注_站内文章点击
+--事件标签： 来源类型:标签
+create table bi_test.zyl_tmp_190611_4 as
+select a.dt,regexp_extract(a.hits_eventinfo_eventlabel,'_([^_]+)',1) keyword,count(*) click
+from bi_dw_ga.fact_ga_hits_data a
+inner join tmp_tags b on regexp_extract(a.hits_eventinfo_eventlabel,'_([^_]+)',1)=b.name
+where a.dt between '2019-05-04' and '2019-06-05' and a.hits_appinfo_appversion regexp '^9.3.2[0-9]|^9.3.[3-9]|^9.[4-9]'
+and a.hits_eventinfo_eventcategory='关注' and a.hits_eventinfo_eventaction='首页关注_站内文章点击' and regexp_extract(a.hits_eventinfo_eventlabel,'([^_]+)_',1)='话题'
+group by a.dt,regexp_extract(a.hits_eventinfo_eventlabel,'_([^_]+)',1);
+
+--4.关注-好价详情电商点击：GA埋点规则
+--事件操作：添加到购物车
+--自定义维度：购物车：中台拆分=G1 包含tag=“标签名”
+create table bi_test.zyl_tmp_190611_5 as
+select a.dt,regexp_extract(a.dim69,'tag=([^_]+)',1) keyword,count(*) event
+from bi_dw_ga.fact_ga_hits_data a
+inner join tmp_tags b on regexp_extract(a.dim69,'tag=([^_]+)',1)=b.name
+where a.dt between '2019-05-04' and '2019-06-05' and a.hits_appinfo_appversion regexp '^9.3.2[0-9]|^9.3.[3-9]|^9.[4-9]'
+and a.hits_eventinfo_eventaction='添加到购物车' and dim69 regexp '(?i)G1'
+group by a.dt,regexp_extract(a.dim69,'tag=([^_]+)',1);
 
 
 
-
- 3.关注信息流点击数：GA埋点规则
-
-        事件类别：关注
-
-        事件操作：首页关注_站内文章点击
-
-        事件标签： 来源类型:标签
-
-                来源名称包含：top100的标签
-
-       4.关注-好价详情电商点击：GA埋点规则
-
-          事件操作：添加到购物车
-
-          自定义维度：购物车：中台拆分=G1 包含tag=“标签名”
+insert overwrite local directory '/data/tmp/zhaoyulong/data' row format delimited fields terminated by '\t'
+select a.dt,a.keyword,a.ljgz,a.yx_count,
+b.sl,b.pv,b.event,
+c.bgl,c.asl,d.click,e.event
+from bi_test.zyl_tmp_190611_1 a
+left join bi_test.zyl_tmp_190611_2 b on a.keyword=b.keyword and a.dt=b.dt
+left join bi_test.zyl_tmp_190611_3 c on a.keyword=c.keyword and a.dt=c.dt
+left join bi_test.zyl_tmp_190611_4 d on a.keyword=d.keyword and a.dt=d.dt
+left join bi_test.zyl_tmp_190611_5 e on a.keyword=e.keyword and a.dt=e.dt
+order by keyword,dt;

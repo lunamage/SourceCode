@@ -7,10 +7,10 @@ select a.dt,count(*) uv
 from(
 select distinct dt,fullvisitorid
 from bi_dw_ga.fact_ga_hits_data a
-where a.dt between '2017-01-01' and '2017-03-31'
+where a.dt between '2019-05-01' and '2019-05-31'
 and a.hits_page_hostname regexp 'wiki' and a.hits_type='PAGE' and a.hits_page_hostname not regexp 'zhi.smzdm.com|go.smzdm.com'
 and a.hits_page_hostname not regexp '(\.m.smzdm)|^(m|h5)') a
-inner join (select * from bi_dw_ga.fact_ga_fullvisitorid_flow where dt between '2017-01-01' and '2017-03-31' and splatform='pc') b on a.dt=b.dt and a.fullvisitorid=b.fullvisitorid
+inner join (select * from bi_dw_ga.fact_ga_fullvisitorid_flow where dt between '2019-05-01' and '2019-05-31' and splatform='pc') b on a.dt=b.dt and a.fullvisitorid=b.fullvisitorid
 group by a.dt;
 
 --百科WAP-UV
@@ -18,10 +18,10 @@ select a.dt,count(*) uv
 from(
 select distinct dt,fullvisitorid
 from bi_dw_ga.fact_ga_hits_data a
-where a.dt between '2017-01-01' and '2017-03-31'
+where a.dt between '2019-05-01' and '2019-05-31'
 and a.hits_page_hostname regexp 'wiki' and a.hits_type='PAGE' and a.hits_page_hostname not regexp 'zhi.smzdm.com|go.smzdm.com'
 and a.hits_page_hostname regexp '(\.m.smzdm)|^(m|h5)') a
-inner join (select * from bi_dw_ga.fact_ga_fullvisitorid_flow where dt between '2017-01-01' and '2017-03-31' and splatform='wap') b on a.dt=b.dt and a.fullvisitorid=b.fullvisitorid
+inner join (select * from bi_dw_ga.fact_ga_fullvisitorid_flow where dt between '2019-05-01' and '2019-05-31' and splatform='wap') b on a.dt=b.dt and a.fullvisitorid=b.fullvisitorid
 group by a.dt;
 
 --品牌库PC-UV
@@ -29,18 +29,18 @@ select a.dt,count(*) uv
 from(
 select distinct dt,fullvisitorid
 from bi_dw_ga.fact_ga_hits_data a
-where a.dt between '2017-01-01' and '2017-03-31'
+where a.dt between '2019-05-01' and '2019-05-31'
 and a.hits_page_hostname regexp 'pinpai.smzdm.com' and a.hits_type='PAGE' and a.hits_page_hostname not regexp 'zhi.smzdm.com|go.smzdm.com' and a.hits_page_pagepath not regexp '/gourl/|/url|/business'
 and a.hits_page_hostname not regexp '(\.m.smzdm)|^(m|h5)') a
-inner join (select * from bi_dw_ga.fact_ga_fullvisitorid_flow where dt between '2017-01-01' and '2017-03-31' and splatform='pc') b on a.dt=b.dt and a.fullvisitorid=b.fullvisitorid
+inner join (select * from bi_dw_ga.fact_ga_fullvisitorid_flow where dt between '2019-05-01' and '2019-05-31' and splatform='pc') b on a.dt=b.dt and a.fullvisitorid=b.fullvisitorid
 group by a.dt;
 
 --品牌库WAP-UV
 select a.dt,count(distinct a.fullvisitorid) uv
 from bi_ods_ga.ods_ga_hits_data a
-left join (select * from bi_ods_ga.ods_ga_hits_customdimensions_data where dt between '2017-01-01' and '2017-03-31' and index='8') c on a.id=c.id and a.dt=c.dt and a.hits_hitnumber=c.hits_hitnumber
-inner join (select * from bi_dw_ga.fact_ga_fullvisitorid_flow where dt between '2017-01-01' and '2017-03-31' and splatform='wap') b on a.fullvisitorid=b.fullvisitorid and a.dt=b.dt
-where a.dt between '2017-01-01' and '2017-03-31' and a.hits_page_hostname!='go.smzdm.com' and a.hits_type='PAGE' and a.hits_page_hostname regexp '(\.m.smzdm)|^(m|h5)'
+left join (select * from bi_ods_ga.ods_ga_hits_customdimensions_data where dt between '2019-05-01' and '2019-05-31' and index='8') c on a.id=c.id and a.dt=c.dt and a.hits_hitnumber=c.hits_hitnumber
+inner join (select * from bi_dw_ga.fact_ga_fullvisitorid_flow where dt between '2019-05-01' and '2019-05-31' and splatform='wap') b on a.fullvisitorid=b.fullvisitorid and a.dt=b.dt
+where a.dt between '2019-05-01' and '2019-05-31' and a.hits_page_hostname!='go.smzdm.com' and a.hits_type='PAGE' and a.hits_page_hostname regexp '(\.m.smzdm)|^(m|h5)'
 and a.hits_page_hostname regexp 'pinpai.m.smzdm.com' and a.hits_page_pagepath not regexp '/gourl/|/url|/business|go.smzdm.com'
 and (c.value not regexp '(?i)smzdmapp' or c.value is null)
 group by a.dt;
@@ -50,18 +50,18 @@ select a.dt,count(*) uv
 from(
 select distinct dt,fullvisitorid
 from bi_dw_ga.fact_ga_hits_data a
-where a.dt between '2017-01-01' and '2017-03-31'
+where a.dt between '2019-05-01' and '2019-05-31'
 and a.hits_page_pagepath regexp 'smzdm.com/mall' and a.hits_type='PAGE' and a.hits_page_hostname not regexp 'zhi.smzdm.com|go.smzdm.com' and a.hits_page_pagepath not regexp '/gourl/|/url|/business'
 and a.hits_page_hostname not regexp '(\.m.smzdm)|^(m|h5)') a
-inner join (select * from bi_dw_ga.fact_ga_fullvisitorid_flow where dt between '2017-01-01' and '2017-03-31' and splatform='pc') b on a.dt=b.dt and a.fullvisitorid=b.fullvisitorid
+inner join (select * from bi_dw_ga.fact_ga_fullvisitorid_flow where dt between '2019-05-01' and '2019-05-31' and splatform='pc') b on a.dt=b.dt and a.fullvisitorid=b.fullvisitorid
 group by a.dt;
 
 --商城WAP-UV
 select a.dt,count(distinct a.fullvisitorid) uv
 from bi_ods_ga.ods_ga_hits_data a
-left join (select * from bi_ods_ga.ods_ga_hits_customdimensions_data where dt between '2017-01-01' and '2017-03-31' and index='8') c on a.id=c.id and a.dt=c.dt and a.hits_hitnumber=c.hits_hitnumber
-inner join (select * from bi_dw_ga.fact_ga_fullvisitorid_flow where dt between '2017-01-01' and '2017-03-31' and splatform='wap') b on a.fullvisitorid=b.fullvisitorid and a.dt=b.dt
-where a.dt between '2017-01-01' and '2017-03-31' and a.hits_page_hostname!='go.smzdm.com' and a.hits_type='PAGE' and a.hits_page_hostname regexp '(\.m.smzdm)|^(m|h5)'
+left join (select * from bi_ods_ga.ods_ga_hits_customdimensions_data where dt between '2019-05-01' and '2019-05-31' and index='8') c on a.id=c.id and a.dt=c.dt and a.hits_hitnumber=c.hits_hitnumber
+inner join (select * from bi_dw_ga.fact_ga_fullvisitorid_flow where dt between '2019-05-01' and '2019-05-31' and splatform='wap') b on a.fullvisitorid=b.fullvisitorid and a.dt=b.dt
+where a.dt between '2019-05-01' and '2019-05-31' and a.hits_page_hostname!='go.smzdm.com' and a.hits_type='PAGE' and a.hits_page_hostname regexp '(\.m.smzdm)|^(m|h5)'
 and a.hits_page_pagepath regexp 'smzdm.com/mall' and a.hits_page_pagepath not regexp '/gourl/|/url|/business|go.smzdm.com'
 and (c.value not regexp '(?i)smzdmapp' or c.value is null)
 group by a.dt;
