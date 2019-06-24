@@ -211,3 +211,4 @@ ps -aux | sort -k4nr | head -10|awk '{print $2}'
 nohup sh tmp0221_2.sh &
 
 ------------------------------------
+端口号查询 ss -lntpd

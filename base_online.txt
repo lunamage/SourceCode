@@ -40,7 +40,7 @@ flink run -m yarn-cluster -c com.zdm.zyl.FlinkSet zyl-0.2.jar
 flink run -m yarn-cluster -c com.zdm.zyl.FlinkStreamTest zyl-0.2.jar &
 
 #dataset
-flink run -m yarn-cluster -c main.AnalysisSDKJson -yqu bi -ynm AnalysisSDKJson -yjm 4096 -p 200 -yn 200 -ys 24 -ytm 40960 DataSet-1.0.jar 2019-05-28
+flink run -m yarn-cluster -c main.AnalysisGaJson -yqu bi -ynm AnalysisGaJson -yjm 4096 -p 200 -yn 20 -ys 24 -ytm 20480 DataSet-1.0.jar 2019-02-04
 flink run -m yarn-cluster -c main.AnalysisSDKJson -yqu bi -ynm AnalysisSDKJson -yjm 4096 -p 100 -yn 100 -ys 24 -ytm 40960 DataSet-1.0.jar
 
 
@@ -58,7 +58,7 @@ redis-cli -h 10.19.82.107 -p 6379
 
  yarn-session.sh -n 4 -jm 1024 -tm 4096
 
-yarn logs -applicationId application_1551780685180_602737 > logs.txt
+yarn logs -applicationId application_1551780685180_741445 > logs.txt
 yarn logs -applicationId application_1551780685180_640156 > logs.txt
 
 

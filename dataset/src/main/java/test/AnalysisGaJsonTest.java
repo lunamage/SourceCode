@@ -13,8 +13,8 @@ public class AnalysisGaJsonTest {
 		
         ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
         DataSet<String> hdfsLines = env.readTextFile("C:/Users/zhaoyulong/Downloads/gajson.txt");
-        hdfsLines.flatMap(new GaSessionFlatMap()).print();
+        //hdfsLines.flatMap(new GaSessionFlatMap()).print();
         //hdfsLines.flatMap(new GaHitsFlatMap()).print();
-        //hdfsLines.flatMap(new GaHitsCustomDimensionsFlatMap()).print();
+        hdfsLines.flatMap(new GaHitsCustomDimensionsFlatMap()).print();
 }
 }

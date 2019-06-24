@@ -5,7 +5,7 @@ package main;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.core.fs.FileSystem.WriteMode;
-import org.apache.flink.api.java.hadoop.mapred.HadoopOutputFormat;
+//import org.apache.flink.api.java.hadoop.mapred.HadoopOutputFormat;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,12 +31,13 @@ import service.GaSessionFlatMap;
  */
 public class AnalysisGaJson {
 	
-	private static Logger log = LoggerFactory.getLogger(AnalysisGaJson.class);
+	//private static Logger log = LoggerFactory.getLogger(AnalysisGaJson.class);
 
     public static void main(String[] args) throws Exception {
         // 任务名称
     	ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
-        
+        env.getConfig().enableForceKryo();
+    	
     	String txdate = args[0];
     	
         DataSet<String> hdfsLines = env.readTextFile("hdfs://cluster/bi/stg_ga/stg_ga_clean_data/dt="+txdate);
@@ -71,7 +72,7 @@ hadoopOutputFormat.getJobConf.set("mapred.output.compression.type", CompressionT
         //DataSet<GaHitsCustomDimensions> gaHitsCustomDimensions1 = hdfsLines.flatMap(new GaHitsCustomDimensionsFlatMap());
         //gaHitsCustomDimensions1.writeAsText("hdfs://cluster/bi/dw_ga/fact_ga_hits_data_test/dt="+txdate, WriteMode.OVERWRITE);
         
-        env.execute("Run_flink_1d");
+        env.execute("ga");
     }
     
      

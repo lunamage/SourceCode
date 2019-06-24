@@ -532,7 +532,7 @@ public class GaHits {
 
 		}
 		catch(Exception e) {
-			//log.error("GaSession error msg is {}", e.getMessage(), e);
+			//log.error("GaHists error msg is {}", e.getMessage(), e);
 		}
 		
 		return result;
