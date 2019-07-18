@@ -1,4 +1,4 @@
-package sdk.olap;
+package sdk.hdfs;
 
 
 import org.apache.flink.api.common.functions.AggregateFunction;

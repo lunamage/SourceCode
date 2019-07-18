@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gmv.olap.OrdersJdmSplitter;
-import sdk.olap.SdkGroupArticleIdSplitter;
+import sdk.hdfs.SdkGroupArticleIdSplitter;
 import utils.ReadConfig;
 
 import java.time.ZoneId;
@@ -31,20 +31,31 @@ import java.util.*;
 public class dataStreamTest {
 	
     public static void main(String[] args) throws Exception {
-    	 StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+    	 //StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
          //env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
          //env.enableCheckpointing(5000);
          
-         DataStream<String> stream_orders_jdm = env.readTextFile ("C:/Users/zhaoyulong/Downloads/stream_orders_jdm.txt");
+         //DataStream<String> stream_orders_jdm = env.readTextFile ("C:/Users/zhaoyulong/Downloads/stream_orders_jdm.txt");
          //DataStream<String> stream_orders_jd = env.readTextFile ("C:/Users/zhaoyulong/Downloads/stream_orders_jd.txt");
          //DataStream<String> stream_orders_tmm = env.readTextFile ("C:/Users/zhaoyulong/Downloads/stream_orders_tmm.txt");
          //DataStream<String> stream_orders_tm = env.readTextFile ("C:/Users/zhaoyulong/Downloads/stream_orders_tm.txt");
-         stream_orders_jdm.flatMap(new OrdersJdmSplitter()).print();
+         //stream_orders_jdm.flatMap(new OrdersJdmSplitter()).print();
          //stream_orders_jd.print();
          //stream_orders_tmm.print();
          //stream_orders_tm.print();
          
-         env.execute("Run flink");
+         //env.execute("Run flink");
+    	
+    	
+    	/*Timer timer = new Timer();  
+        timer.schedule(new TimerTask() {  
+            public void run() {  
+                System.out.println("-------设定要指定任务--------");  
+            }  
+        }, 1000,3000); */
+    	
+    	String[] b= ReadConfig.getProperties("db.app").split("\\|");
+    	System.out.println(b[0]+"\n"+b[1] );
      }
 }
 

@@ -1,0 +1,36 @@
+scan "hbase_table", {LIMIT=>20}
+
+scan "hbase_table", {FILTER=>"PrefixFilter('2019-07-03_ab_pv')"}
+
+
+describe "bi:hbase_test"
+
+explain
+select * from "hbase_table" where "ck" like 'pv\_ab\_%' and "dim1" between '2019-07-03' and '2019-07-03' order by "dim1","dim2";
+
+select "dim1","dim2",
+max(case when "ck" like 'pv\_ab\_%' then "val" else '1' end) pv,
+max(case when "ck" like 'uv\_ab\_%' then "val" else '1' end) uv,
+max(case when "ck" like 'addtocart\_ab\_%' then "val" else '1' end) addtocart
+from "hbase_table"
+where ("ck" like 'pv\_ab\_%' or "ck" like 'uv\_ab\_%' or "ck" like 'addtocart\_ab\_%')
+and "dim1" between '2019-06-17' and '2019-07-10'
+group by "dim1","dim2";
+
+select
+"dim1",
+"dim2",
+max(case when "ck" like 'uv\_ab%' then "val" else '0' end) v
+from "hbase_table"
+where "ck" like 'uv\_ab%' and "dim1" = '2019-06-15'
+group by "dim1","dim2";
+
+
+phoenix-sqlline
+
+2019-07-03
+
+jumpserver-itoamms.smzdm.com
+
+
+select * from "hbase_table" where "ck" regexp 'ab_pv' order by "dim1","dim2";
