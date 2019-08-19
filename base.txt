@@ -48,7 +48,7 @@ select *from bi_test.zyl_tmp_190429_4 order by abtest,cast(sl as int);
 scp /data/jenkins/jobs/stg.tar.gz root@jenkins_new:/data/jenkins/jobs/
 scp -r /data/jenkins root@jenkins_new:/data/jenkins
 
-curl http://hadoop002:19888/jobhistory/attempts/job_1551780685180_906777/m/FAILED
+curl http://hadoop002:19888/jobhistory/attempts/job_1564413957136_17614/m/FAILED
 
 http://106.75.20.192/#/projects
 10.10.172.28
@@ -109,6 +109,7 @@ hadoop jar test_mr.jar MapReduce/JsonJobSubmitter /bi/test/test_json /bi/test/te
 
 rsync -av --progress /data/tmp/zhaoyulong/data/* root@10.9.16.199:/data/machinelearning/data/train_data_data
 rsync -av --progress zyl-0.2.jar bi@azkaban:/data/source/data_warehouse/ga/jar/zyl-0.2.jar
+rsync -av --progress datastream-1.1.jar bi@azkaban-03:/data/source/data_warehouse/ga/jar/datastream-1.1.jar
 
 rsync -av --progress /data/feature_center_factory/purchasepower/* bi@azkaban:/data/feature_center_factory/purchasepower
 
@@ -170,10 +171,20 @@ keys u1d
 
 redis-cli -h 10.19.82.107 -p 6379
 
- yarn-session.sh -n 4 -jm 1024 -tm 4096
+#搜索
+redis-cli -h 10.19.131.185 -p 6379
+keys rqac*
+hgetall "rqac_1119"
 
-yarn logs -applicationId application_1551780685180_633199 > logs.txt
-yarn logs -applicationId application_1551780685180_640156 > logs.txt
+redis-cli -h 10.19.30.72 -p 6379
+
+
+
+
+
+yarn-session.sh -n 4 -jm 1024 -tm 4096
+
+yarn logs -applicationId application_1564413957136_128645 > logs.txt
 
 
 yarn application -kill application_1551780685180_522125

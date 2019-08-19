@@ -1,10 +1,11 @@
-package com.zdm.zyl;
+package toredis;
 
 
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.io.OutputFormat;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisConfigBase;
 import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisPoolConfig;
@@ -25,8 +26,10 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisShardInfo;
+import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
+import utils.ReadConfig;
 
 import java.io.IOException;
 import java.util.*;
@@ -37,28 +40,25 @@ import java.util.*;
  * @time: 3:14 PM
  * @Description: 实时特征计算
  */
-public class FlinkSet {
+public class avg15ChannelStatistics {
 	
-	private static Logger log = LoggerFactory.getLogger(FlinkSet.class);
-	
-    private final static String IMP_LOG_STATUS = "\"type\":\"show\"";
-    private final static String CLICK_LOG_STATUS = "\"type\":\"event\"";
-    
+	private static Logger log = LoggerFactory.getLogger(avg15ChannelStatistics.class);
+
     public static void main(String[] args) throws Exception {
         // 任务名称
     	ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
     	//线上 hdfs://cluster
     	//测试 hdfs://hadoop-test
     	
-        DataSet<String> hdfsLines = env.readTextFile(ReadConfig.getProperties("hdfs.prefix")+"/bi/app_ga/app_user_portrait_redis");
+        DataSet<String> hdfsLines = env.readTextFile("hdfs://cluster/bi/app_ga/app_recommend_avg15ChannelStatistics");
         
-        DataSet<Tuple3<String, String, String>> data = hdfsLines.flatMap(new Tokenizer());
+        DataSet<Tuple2<String, String>> data = hdfsLines.flatMap(new Tokenizer());
         
         //data.print();
 		
-		data.output(new OutputFormat<Tuple3<String, String, String>>() {
+		data.output(new OutputFormat<Tuple2<String, String>>() {
 
-			private ShardedJedisPool jedisPool;
+			 private JedisPool jedisPool;
             //private Jedis jedis;
 
             @Override
@@ -69,35 +69,31 @@ public class FlinkSet {
 
             @Override
             public void open(int i, int i1) throws IOException {
-            	 // 创建jedis池配置实例
-                JedisPoolConfig config = new JedisPoolConfig();
-                // #jedis的最大分配对象#
-                config.setMaxTotal(Integer.valueOf(ReadConfig.getProperties("jedis.pool.maxActive")));
-                // #jedis最大保存idel状态对象数 #
-                config.setMaxIdle(Integer.valueOf(ReadConfig.getProperties("jedis.pool.maxIdle")));
+            	   // 创建jedis池配置实例
+    	        JedisPoolConfig config = new JedisPoolConfig();
+    	        // #jedis的最大分配对象#
+    	        config.setMaxTotal(Integer.valueOf(ReadConfig.getProperties("jedis.pool.maxActive")));
+    	        // #jedis最大保存idel状态对象数 #
+    	        config.setMaxIdle(Integer.valueOf(ReadConfig.getProperties("jedis.pool.maxIdle")));
 
-                //this.jedisPool = new JedisPool(config, ReadConfig.getProperties("redis.article.feature"),
-                //        Integer.valueOf(ReadConfig.getProperties("redis.port")),
-                //        Integer.valueOf(ReadConfig.getProperties("jedis.pool.timeout")));
-                
-                List<JedisShardInfo> rtShard = Arrays.asList(
-                        new JedisShardInfo(ReadConfig.getProperties("redis.rt.article.m1"), Integer.valueOf(ReadConfig.getProperties("redis.port")), Integer.valueOf(ReadConfig.getProperties("jedis.pool.timeout"))),
-                        new JedisShardInfo(ReadConfig.getProperties("redis.rt.article.m2"), Integer.valueOf(ReadConfig.getProperties("redis.port")), Integer.valueOf(ReadConfig.getProperties("jedis.pool.timeout"))));
-
-                this.jedisPool = new ShardedJedisPool(config, rtShard);
+    	        this.jedisPool = new JedisPool(config, ReadConfig.getProperties("redis.address"),
+    	                Integer.valueOf(ReadConfig.getProperties("redis.port")),
+    	                Integer.valueOf(ReadConfig.getProperties("jedis.pool.timeout")));
             }
             
             
             @Override
-            public void writeRecord(Tuple3<String, String, String> tuple) throws IOException {
-            	//log.info(tuple.f0+tuple.f1+String.valueOf(tuple.f2));
-            	try (ShardedJedis jedis = jedisPool.getResource()) {
-                	jedis.hset(tuple.f0, tuple.f1, tuple.f2);
-                	jedis.expire(tuple.f0, 86400);
-            	}
-            	catch (Exception e) {
-                    log.error("redis error ", e.getMessage(), e);
-                }
+            public void writeRecord(Tuple2<String, String> tuple) throws IOException {       	
+            	 try (Jedis jedis = jedisPool.getResource(); Pipeline line = jedis.pipelined()) {
+     	            line.set(tuple.f0,tuple.f1);
+     	            line.sync();
+            		//System.out.print(tuple.f0+" "+tuple.f1); 
+            		 
+     	        } catch (Exception e) {
+     	            log.error("set redis error is {} ", e.getMessage());
+     	        }
+            	
+            	
             }
 
             @Override
@@ -106,20 +102,21 @@ public class FlinkSet {
             }
         });
 		
-        env.execute("Run_flink_1d");
+        env.execute("avg15ChannelStatistics");
     }
     
-    public static class Tokenizer implements FlatMapFunction<String,Tuple3<String, String, String>>{
-        public void flatMap(String msg, Collector<Tuple3<String, String, String>> collector) {
+    public static class Tokenizer implements FlatMapFunction<String,Tuple2<String, String>>{
+        public void flatMap(String msg, Collector<Tuple2<String, String>> collector) {
         	try {
-            	String[] data = msg.split("\\|");
+            	//String[] data = msg.split("\\|");
+            	String[] data = msg.split("\\001");
             	//String userProxyId = data[0];
             	//for (String items : data[1].split(",")) {
             		//Map<String,String> item = JSONObject.parseObject(items, Map.class);
             		//String[] key = item.get("key").split("_");
             		//String imp = item.get("imp");
             		//String click = item.get("click");
-            	collector.collect(new Tuple3<>(data[0], data[1], data[2]));
+            	collector.collect(new Tuple2<>(data[0], data[1]));
                 
 
             } catch (Exception e) {

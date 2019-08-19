@@ -34,14 +34,33 @@ flink run -m yarn-cluster -c com.zdm.zyl.FlinkStreamTest -yqu bitmp -ynm 24H_ctr
 #推荐实时olap
 flink run -m yarn-cluster -c main.SdkGroupArticleId -yqu bi -ynm ctr_olap -p 24 -yn 8 -ys 8 -ytm 8192 datastream-1.0.jar &
 
+#搜索测试
+flink run -m yarn-cluster -c search.query.QueryRealtime -yqu bi -ynm queryRealtime -p 4 -yn 4 -ys 4 -ytm 102400 datastream-1.1.jar &
+
+flink run -m yarn-cluster -c search.query.QueryRealtime3h -yqu bi -ynm queryRealtime3h -p 1 -yn 16 -ys 16 -ytm 22480 datastream-1.1.jar &
+flink run -m yarn-cluster -c search.query.QueryRealtime12h -yqu bi -ynm queryRealtime12h -p 1 -yn 1 -ys 4 -ytm 51200 datastream-1.1.jar &
+
+
+
+#用户设备id写入
+flink run -m yarn-cluster -c recommend.deviceType.UserDeviceFeature -yqu bi -ynm UserDeviceFeature -p 4 -yn 16 -ys 16 -ytm 22480 datastream-1.0.jar &
+
+#推荐商城相关
+flink run -m yarn-cluster -c recommend.mall.MallFeature -yqu bi -ynm MallFeature -p 1 -yn 16 -ys 16 -ytm 22480 datastream-1.0.jar &
+
 
 #test
 flink run -m yarn-cluster -c com.zdm.zyl.FlinkSet zyl-0.2.jar
 flink run -m yarn-cluster -c com.zdm.zyl.FlinkStreamTest zyl-0.2.jar &
+--
+flink run -m yarn-cluster -c recommend.mall.MallFeature -ynm MallFeature datastream-1.0.jar &
+flink run -m yarn-cluster -c recommend.deviceType.UserDeviceFeature -ynm UserDeviceFeature datastream-1.0.jar &
 
 #dataset
 flink run -m yarn-cluster -c main.AnalysisGaJson -yqu bi -ynm AnalysisGaJson -yjm 4096 -p 100 -yn 100 -ys 16 -ytm 30720 DataSet-1.0.jar 2019-02-04
 flink run -m yarn-cluster -c main.AnalysisSDKJson -yqu bi -ynm AnalysisSDKJson -yjm 4096 -p 100 -yn 100 -ys 24 -ytm 40960 DataSet-1.0.jar
+
+flink run -m yarn-cluster -c toredis.avg15ChannelStatistics -yqu bi -ynm avg15ChannelStatistics -yjm 4096 -p 4 -yn 8 -ys 8 -ytm 40960 DataSet-1.0.jar
 
 -----
 
