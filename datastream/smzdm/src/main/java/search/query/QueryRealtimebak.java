@@ -66,45 +66,45 @@ import java.util.concurrent.TimeUnit;
  * @Description: sdk文章数据聚合
  */
 public class QueryRealtimeBak {
-	
+
 	private static Logger log = LoggerFactory.getLogger(QueryRealtimeBak.class);
-	
+
 	private final static String filter1 = "\"ec\":\"搜索\"";
     private final static String filter2 = "\"ea\":\"点击\"";
     private final static String filter3 = "\"ec\":\"04\"";
     private final static String filter4 = "\"ea\":\"03\"";
-    
+
 
     public static void main(String[] args) throws Exception {
-    	
+
     	 StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
          env.setStreamTimeCharacteristic(TimeCharacteristic.IngestionTime);
          //
          env.enableCheckpointing(120000L);
          env.getCheckpointConfig().setMinPauseBetweenCheckpoints(30000L);
          env.getCheckpointConfig().setCheckpointTimeout(1800000L);
-         
+
          env.setStateBackend((StateBackend) new FsStateBackend("hdfs://cluster/bi/flink_checkpoint/searchquery",true));
          //env.setStateBackend((StateBackend) new RocksDBStateBackend("hdfs://cluster/bi/flink_checkpoint/searchquery",true));
-         
+
          Properties properties = new Properties();
          properties.setProperty("bootstrap.servers",ReadConfig.getProperties("bootstrap.servers"));
          properties.setProperty("group.id", "queryRealtime");
- 	
+
          FlinkKafkaConsumer<String> myConsumer = new FlinkKafkaConsumer<>(ReadConfig.getProperties("kafka.topic"), new SimpleStringSchema(), properties);
          myConsumer.setStartFromGroupOffsets();
          //myConsumer.setStartFromLatest();
          DataStream<Tuple5<String, String, Double, String, Long>> stream = env.addSource(myConsumer).filter((FilterFunction<String>) log -> {
              return log.contains(filter1) && log.contains(filter2) || log.contains(filter3) && log.contains(filter4);
          }).flatMap(new QueryRealtimeSplitterBak());
-         
+
          //1.
          DataStream<Map<String, String>> streamMySql = env.addSource(new JdbcReader());
  		 //2、创建MapStateDescriptor规则，对广播的数据的数据类型的规则
          MapStateDescriptor <String,Map<String,String>> ruleStateDescriptor = new MapStateDescriptor <>("dimquery",BasicTypeInfo.STRING_TYPE_INFO,new MapTypeInfo<>(String.class,String.class));
          //3、对conf进行broadcast返回BroadcastStream
          final BroadcastStream <Map<String, String>> confBroadcast = streamMySql.broadcast(ruleStateDescriptor);
-         
+
          KeyedStream<Tuple5<String, String, Double, String, Long>, Tuple> keyedStream = stream.connect(confBroadcast).process(
         		 new BroadcastProcessFunction <Tuple5<String, String, Double, String, Long>, Map <String, String>, Tuple5<String, String, Double, String, Long>>() {
 					//private Map<String,String> keyWords = new Hashtable<String, String>();
@@ -114,7 +114,7 @@ public class QueryRealtimeBak {
                      public void open(Configuration parameters) throws Exception {
                          super.open(parameters);
                      }
-                     
+
                      /**
                       * 接收广播中的数据
                       * @param value
@@ -127,7 +127,7 @@ public class QueryRealtimeBak {
                          log.info("zdm "+value.size());
                          ctx.getBroadcastState(ruleStateDescriptor).put("keyWords", value);
                      }
-                     
+
                      @Override
                      public void processElement(Tuple5<String, String, Double, String, Long> value, ReadOnlyContext ctx, Collector <Tuple5<String, String, Double, String, Long>> out) throws Exception {
                         //Thread.sleep(30);
@@ -136,18 +136,18 @@ public class QueryRealtimeBak {
  							String result = map.get(value.f0);
  							if (result != null) {
  								out.collect(new Tuple5 <>(result, value.f1, value.f2, value.f3, value.f4));
- 							}                    
+ 							}
  						}
  					}
                  }).keyBy(0);
-         
+
          //keyedStream.timeWindow(Time.hours(3), Time.minutes(2)).aggregate(new cal(), new WindowResultFunction()).addSink(new QueryRealtimeRedisSink3h()).slotSharingGroup("group1");
          //keyedStream.timeWindow(Time.hours(12), Time.minutes(2)).aggregate(new cal(), new WindowResultFunction()).addSink(new QueryRealtimeRedisSink12h()).slotSharingGroup("group2");
-         
+
          env.execute();
     }
-    
-    
+
+
     public static class CalEntity {
         public int sl = 0;
         public Double correctSl = 0.0;
@@ -183,7 +183,7 @@ public class QueryRealtimeBak {
 		public String toString() {
 			return "ItemFeatureEntity [queryId=" + queryId + ", val=" + val + ", windowEnd=" + windowEnd + "]";
 		}
-        
+
     }
 
     public static class cal implements AggregateFunction<Tuple5<String, String, Double, String, Long>, HashMap<String, CalEntity>, HashMap<String, CalEntity>> {
@@ -230,9 +230,9 @@ public class QueryRealtimeBak {
                 String sl = String.valueOf(map.getValue().sl);
                 DecimalFormat df = new DecimalFormat("#.00");
                 String correctSl = String.valueOf(df.format(map.getValue().correctSl));
-                
+
                 DecimalFormat df2 = new DecimalFormat("0.0000");
-                
+
                 int imp = map.getValue().imp;
                 Double ctr = imp == 0 ? 0.0 : Double.valueOf(df2.format(Double.valueOf(sl) / imp));
                 if(!sl.equals("0")) {
@@ -245,6 +245,3 @@ public class QueryRealtimeBak {
         }
     }
 }
-
-
-
