@@ -2,6 +2,9 @@ package search.query;
 
 import com.alibaba.fastjson.JSONObject;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.api.java.tuple.Tuple14;
@@ -41,6 +44,38 @@ public class QueryRealtimeSplitter extends RichFlatMapFunction<String, Tuple5<St
 	private static final long serialVersionUID = -8284916412921643582L;
 	private static Logger log = LoggerFactory.getLogger(QueryRealtimeSplitter.class);
 	
+	private JedisPool jedisPool;
+	private Map<String, String> queryMap = new ConcurrentHashMap<>();
+	
+	
+	@Override
+    public void open(Configuration parameters) {
+        // 创建jedis池配置实例
+        JedisPoolConfig config = new JedisPoolConfig();
+        // #jedis的最大分配对象#
+        config.setMaxTotal(Integer.valueOf(ReadConfig.getProperties("jedis.pool.maxActive")));
+        // #jedis最大保存idel状态对象数 #
+        config.setMaxIdle(Integer.valueOf(ReadConfig.getProperties("jedis.pool.maxIdle")));
+        // #在borrow一个jedis实例时，是否提前进行validate操作；如果为true，则得到的jedis实例均是可用的
+        //config.setTestOnBorrow(false);
+        // #jedis调用returnObject方法时，是否进行有效检查 #
+        //config.setTestOnReturn(false);
+
+        this.jedisPool = new JedisPool(config, ReadConfig.getProperties("redis.query.address"),
+                Integer.valueOf(ReadConfig.getProperties("redis.port")),
+                Integer.valueOf(ReadConfig.getProperties("jedis.pool.timeout")));
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 3);//控制小时
+        calendar.set(Calendar.MINUTE, 30);//控制分钟
+        calendar.set(Calendar.SECOND, 0);//控制秒
+        Date time = calendar.getTime();//执行任务时间为3:00:00
+        Date newDate = DateUtils.getDateBeforeOrAfterDays(time, 1);
+        Timer timer = new Timer();
+        //每天定时3:00执行操作，延迟一天后再执行
+        timer.schedule(new TimerTaskClearMap(), newDate, 1000 * 60 * 60 * 24);
+    }
+	
 
     @SuppressWarnings("unchecked")
 	@Override
@@ -55,8 +90,7 @@ public class QueryRealtimeSplitter extends RichFlatMapFunction<String, Tuple5<St
 			if(ecp == null) {return;}
 			//解析json
 			String ec = sdk.get("ec");
-			String slt = String.valueOf(sdk.get("slt"));
-			Long timestamp = slt == null || Objects.equals(slt, "0") ? System.currentTimeMillis() : Long.valueOf(slt) * 1000;
+			Long timestamp = System.currentTimeMillis();
 			
 			if(ec.equals("搜索")) {
 				String articleId = ecp.get("4");
@@ -67,8 +101,9 @@ public class QueryRealtimeSplitter extends RichFlatMapFunction<String, Tuple5<St
 				if(articleId == null) {return;}
 				if(channelId == null || !channelId.matches("^1|2|5|21$")) {return;}
 				if(query == null) {return;}
-				String queryBase64 = Base64.getEncoder().encodeToString(query.getBytes("UTF-8"));
-				collector.collect(new Tuple5<>(queryBase64,channelId+"_"+articleId,positionValue,"click",timestamp));
+				String queryId = getQueryId(Utils.getMD5(query.toUpperCase()));
+				if(queryId == null) {return;}
+				collector.collect(new Tuple5<>(queryId,channelId+"_"+articleId,positionValue,"click",timestamp));
 			}
 			
 			if(ec.equals("04")) {
@@ -90,8 +125,9 @@ public class QueryRealtimeSplitter extends RichFlatMapFunction<String, Tuple5<St
 				
 				
 				if(query == null) {return;}
-				String queryBase64 = Base64.getEncoder().encodeToString(query.getBytes("UTF-8"));
-				collector.collect(new Tuple5<>(queryBase64,channelId+"_"+articleId,positionValue,"imp",timestamp));
+				String queryId = getQueryId(Utils.getMD5(query.toUpperCase()));
+				if(queryId == null) {return;}
+				collector.collect(new Tuple5<>(queryId,channelId+"_"+articleId,positionValue,"imp",timestamp));
 			}
 
         	} catch (Exception e) {
@@ -99,6 +135,24 @@ public class QueryRealtimeSplitter extends RichFlatMapFunction<String, Tuple5<St
         		return;
         	}
     }
+    
+    private String getQueryId(String query) {
+        String queryId = queryMap.get(query);
+        if (queryId != null) return queryId;
+        // 未缓存，则读取redis
+        try (Jedis jedis = jedisPool.getResource()) {
+        	queryId = jedis.get(query);
+            if (queryId == null) return null;
+            queryMap.put(query, queryId);
+            return queryId;
+        } catch (Exception e) {
+            log.error("flatMap jedis get value error msg is {} itemId is {} ", e.getMessage(), query, e);
+        }
+        return null;
+    }
+
+    
+    
     
     public boolean isJson(String content){
   	  try {
@@ -108,4 +162,13 @@ public class QueryRealtimeSplitter extends RichFlatMapFunction<String, Tuple5<St
   	  		return false;
   	  	}
   	}
+    
+    class TimerTaskClearMap extends TimerTask {
+        // 每日3点定期清空缓存的文章数据
+        @Override
+        public void run() {
+            log.info("delete catesMap size {} , time {} ", queryMap.size(), DateUtils.formatDate(new Date(), DateUtils.YYYYMMDD_HMS));
+            queryMap.clear();
+        }
+    }
 }

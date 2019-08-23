@@ -1,6 +1,8 @@
 package test;
 
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -26,39 +28,11 @@ import utils.Utils;
 public class MessageSplitterTest {
 	
 	public static void main(String[] args) throws Exception {
+		
+		String a ="手机";
+		
+		System.out.print(Utils.getMD5(a));
     
-	    Map<String, String> map = new HashMap<String, String>();
-        map.put("c", "0.123");
-        map.put("a", "0.122");
-        map.put("b", "0.122");
-        map.put("d", "0.122");
-        map.put("e", "0.122");
-        map.put("f", "0.121");
-        map.put("g", "0.121");
-        
-        //HashMap<String,Integer> m = new HashMap<>();
-		//List<Integer> t = new ArrayList<>();
-        
-        //HashMap<String, Double> newmap = new HashMap<String, Double>();
-        
-        //newmap = Utils.mapRatio(map);
-
-        HashMap<String,Integer> t = Utils.mapOrder(map);
-        for(Map.Entry<String, Integer> entry : t.entrySet()){
-            String mapKey = entry.getKey();
-            Integer mapValue = entry.getValue();
-            System.out.println(mapKey+":"+mapValue);
-        }
-        
-     String a = "通用_0";
-     
-     System.out.println(a);
-     
-     
-	 if(a.matches("^1|2|5|21$")) {
-		 System.out.println("123");
-	 }
-	 
-	
+		
 	}	
 }

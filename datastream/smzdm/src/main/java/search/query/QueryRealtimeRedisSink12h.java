@@ -58,9 +58,11 @@ public class QueryRealtimeRedisSink12h extends RichSinkFunction<QueryRealtime.It
 	        for (Map.Entry<String, Object[]> entry : value.getVal().entrySet()) {
 	            String k = entry.getKey();
 	            Object[] vals = entry.getValue();
-	            queryClickMap.put("rcl_"+k+"_12h", String.valueOf(vals[0]));
-	            queryClickMapTmp.put(k, String.valueOf(vals[0]));
-	            queryClickRfMap.put(k, String.valueOf(vals[1]));
+	            if(!String.valueOf(vals[0]).equals("0")) {
+	            	queryClickMap.put("rcl_"+k+"_12h", String.valueOf(vals[0]));
+		            queryClickMapTmp.put(k, String.valueOf(vals[0]));
+		            queryClickRfMap.put(k, String.valueOf(vals[1]));
+	            }
 	            //过滤CTR为0数据
 	            if(!String.valueOf(vals[2]).equals("0.0")) {
 	            	queryCtrMap.put(k, String.valueOf(vals[2]));
@@ -69,9 +71,13 @@ public class QueryRealtimeRedisSink12h extends RichSinkFunction<QueryRealtime.It
 	        // 无数据不操作。
 	        if (queryClickMap.size() == 0 || queryClickRfMap.size() == 0) {return;}
 	        
+	        try {
 	        queryClickRankMap = Utils.mapOrder(queryClickMapTmp);
 	        queryClickRankRfMap = Utils.mapOrder(queryClickRfMap);
-	        queryClickratioMap = Utils.mapRatio(queryClickMapTmp);
+	        queryClickratioMap = Utils.mapRatio(queryClickMapTmp);}
+	        catch (Exception e) {
+	        	log.error("hset redis error queryId is {} msg is {} ", queryId, e.getMessage());
+	        }
 	        
 	        Map<String, String> map = new HashMap<>();
 	        map.put(queryId+"_12h", JSONObject.toJSONString(queryClickMap));

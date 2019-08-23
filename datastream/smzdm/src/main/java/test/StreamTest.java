@@ -47,7 +47,7 @@ import recommend.deviceType.UserDeviceFeature;
 import recommend.deviceType.UserDeviceFeatureRedisSink;
 import recommend.deviceType.UserDeviceFeatureSplitter;
 import search.query.JdbcReader;
-import search.query.QueryRealtimeSplitter;
+import search.query.QueryRealtimeSplitterBak;
 import utils.ReadConfig;
 
 import java.sql.Connection;
