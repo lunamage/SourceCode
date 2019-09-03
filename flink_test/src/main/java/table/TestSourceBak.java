@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public class GeneUISource implements SourceFunction<List> {
+public class TestSourceBak implements SourceFunction<List> {
 
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	private volatile boolean isRunning = true;
@@ -24,7 +24,7 @@ public class GeneUISource implements SourceFunction<List> {
 	@Override
 	public void run(SourceContext<List> ctx) throws Exception {
 		while (isRunning) {
-			Thread.sleep(100);
+			Thread.sleep(1000);
 			// 省市、id、datestamp、date、计数,
 			List list = new ArrayList();
 			date = new Date();

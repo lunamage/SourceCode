@@ -1,5 +1,6 @@
 package search.query;
 
+import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.JoinFunction;
@@ -59,6 +60,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 
+
 /**
  * @author: zyl
  * @date: 2019/6/25
@@ -78,15 +80,17 @@ public class QueryRealtime {
     public static void main(String[] args) throws Exception {
     	
     	 StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-         env.setStreamTimeCharacteristic(TimeCharacteristic.IngestionTime);
+         env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
          //
-         env.enableCheckpointing(120000L);
+         env.enableCheckpointing(300000L);
          env.getCheckpointConfig().setMinPauseBetweenCheckpoints(30000L);
          env.getCheckpointConfig().setCheckpointTimeout(1800000L);
          
-         //env.setStateBackend((StateBackend) new FsStateBackend("hdfs://cluster/bi/flink_checkpoint/searchquery",true));
+         env.setStateBackend((StateBackend) new FsStateBackend("hdfs://cluster/bi/flink_checkpoint/searchquery",true));
          
-         env.setStateBackend((StateBackend) new RocksDBStateBackend("hdfs://cluster/bi/flink_checkpoint/searchquery",true));
+         //env.setStateBackend((StateBackend) new RocksDBStateBackend("hdfs://cluster/bi/flink_checkpoint/searchquery",true));
+         ExecutionConfig executionConfig = new ExecutionConfig();
+ 		 executionConfig.setUseSnapshotCompression(true);
  
 
          
@@ -95,14 +99,15 @@ public class QueryRealtime {
          properties.setProperty("group.id", "queryRealtime");
  	
          FlinkKafkaConsumer<String> myConsumer = new FlinkKafkaConsumer<>(ReadConfig.getProperties("kafka.topic"), new SimpleStringSchema(), properties);
+         
          myConsumer.setStartFromGroupOffsets();
          //myConsumer.setStartFromLatest();
          KeyedStream<Tuple5<String, String, Double, String, Long>, Tuple> keyedStream = env.addSource(myConsumer).filter((FilterFunction<String>) log -> {
              return log.contains(filter1) && log.contains(filter2);
          }).flatMap(new QueryRealtimeSplitter()).keyBy(0);
          
-         keyedStream.timeWindow(Time.hours(3), Time.minutes(2)).aggregate(new cal(), new WindowResultFunction()).addSink(new QueryRealtimeRedisSink3h()).slotSharingGroup("group1");
-         keyedStream.timeWindow(Time.hours(12), Time.minutes(2)).aggregate(new cal(), new WindowResultFunction()).addSink(new QueryRealtimeRedisSink12h()).slotSharingGroup("group2");
+         keyedStream.timeWindow(Time.hours(3), Time.seconds(120)).aggregate(new cal(), new WindowResultFunction()).addSink(new QueryRealtimeRedisSink3h()).slotSharingGroup("group1");
+         keyedStream.timeWindow(Time.hours(12), Time.seconds(120)).aggregate(new cal(), new WindowResultFunction()).addSink(new QueryRealtimeRedisSink12h()).slotSharingGroup("group2");
          
          env.execute();
     }

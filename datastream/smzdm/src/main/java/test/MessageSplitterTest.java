@@ -28,11 +28,9 @@ import utils.Utils;
 public class MessageSplitterTest {
 	
 	public static void main(String[] args) throws Exception {
-		
-		String a ="手机";
-		
-		System.out.print(Utils.getMD5(a));
-    
+		String[] a="123|asas|azz".split("\\|");
+        
+        System.out.println(a[1]);
 		
 	}	
 }

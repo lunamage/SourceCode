@@ -74,3 +74,12 @@ bin/supervise  -c conf/supervise/quickstart.conf
 ./bin/post-index-task --file quickstart/ctrhdfs.json
 /data/local/imply-2.9.16/bin/post-index-task --file quickstart/Recommend.json
 http://localhost:9095/datasets/
+
+-----------------------------
+flink savepoint 9f1d5c9e986e3de12bd2639771f65ac4 hdfs://cluster/bi/flink_savepoint -yid application_1564413957136_211810
+
+state.savepoints.dir: hdfs://t-sha1-flk-01:9000/flink-savepoints
+
+flink cancel -s 9f1d5c9e986e3de12bd2639771f65ac4 -yid application_1564413957136_211810
+
+flink run -s hdfs://cluster/bi/flink_savepoint/savepoint-9f1d5c-4ac64dad8076 -m yarn-cluster -c search.query.QueryRealtime -yqu bi -ynm queryRealtime -p 4 -yn 4 -ys 1 -ytm 40480 /data/source/data_warehouse/ga/jar/datastream-1.1.jar &

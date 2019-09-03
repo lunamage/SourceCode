@@ -176,6 +176,12 @@ redis-cli -h 10.19.82.107 -p 6379
 redis-cli -h 10.19.131.185 -p 6379
 keys rqac*
 hgetall "rqac_1119"
+hget "rqac_1119" "51119_3h"
+hget "rqac_1119" "51119_3h_rf"
+hget "rqac_1119" "51119_3h_rank"
+hget "rqac_1119" "51119_3h_rank_rf"
+
+
 
 redis-cli -h 10.19.30.72 -p 6379
 

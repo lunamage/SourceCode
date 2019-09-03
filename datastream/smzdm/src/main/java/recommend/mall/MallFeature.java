@@ -80,7 +80,7 @@ public class MallFeature {
     public static void main(String[] args) throws Exception {
     	
     	 StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-         env.setStreamTimeCharacteristic(TimeCharacteristic.IngestionTime);
+         env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
          env.enableCheckpointing(60000L);
          env.getCheckpointConfig().setMinPauseBetweenCheckpoints(10000L);
          env.getCheckpointConfig().setCheckpointTimeout(1200000L);

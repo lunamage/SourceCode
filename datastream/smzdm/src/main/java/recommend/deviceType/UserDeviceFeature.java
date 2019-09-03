@@ -71,7 +71,7 @@ public class UserDeviceFeature {
     public static void main(String[] args) throws Exception {
     	
     	 StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-         env.setStreamTimeCharacteristic(TimeCharacteristic.IngestionTime);
+         env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
          //env.enableCheckpointing(120000L);
          //env.getCheckpointConfig().setMinPauseBetweenCheckpoints(30000L);
          //env.setStateBackend((StateBackend) new RocksDBStateBackend("hdfs://cluster/bi/flink_checkpoint/searchquery3h",true));
