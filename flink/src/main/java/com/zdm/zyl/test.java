@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.flink.api.java.tuple.Tuple4;
@@ -91,8 +92,14 @@ public class test {
 		
 		//System.out.print(ReadConfig.getProperties("hdfs.prefix")+"/bi/app_ga/app_user_portrait_redis");
 		
-		String ITEM_BASE_INFO = "ib_%s_%s";
-		System.out.print(String.format(ITEM_BASE_INFO, "123456", 3));
+		String regex = "^[1-9]{1}[0-9]*$";
+		String input= "102";
+		Pattern p = Pattern.compile(regex);
+		Matcher m = p.matcher("");
+		System.out.println(m.matches());//false
+		m.reset();
+		System.out.println(m.find());//true
+	
 		
 		
 		

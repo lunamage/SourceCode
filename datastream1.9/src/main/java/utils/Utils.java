@@ -95,6 +95,8 @@ public class Utils {
                value=mapping.getValue();
                m.put(mapping.getKey(), i);
           } 
+        
+        m.put("0",i+1);
 		
 		return m;
 	}

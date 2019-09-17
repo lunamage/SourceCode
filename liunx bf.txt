@@ -179,6 +179,9 @@ mysql -h10.9.28.135 -P3353 -urecommendUser -p'pVhXTntx9ZG'
 #测试
 mysql -h10.19.146.157 -P3306 -ubi_test_user -p'Z16woifm82jzT4s'
 
+#tuijian
+mysql -h10.9.28.135 -P3317 -urecommendUser -p'pVhXTntx9ZG'
+
 --------------------------------------------------------------------------------
 #导出数据到txt
 sudo -usmzdm mysql -h dev_ga_data_warehouse_mysql_s01 -uwdDBUser -p2Gb\(tv+-n -B dev_smzdm_base -e     "" > /home/zhaoyulong/数据.txt

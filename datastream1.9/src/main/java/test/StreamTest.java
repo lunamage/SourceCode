@@ -42,9 +42,11 @@ import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import recmmend.artRead.ArtReadFeatureSplitter;
 import recommend.deviceType.UserDeviceFeature;
 import recommend.deviceType.UserDeviceFeatureRedisSink;
 import recommend.deviceType.UserDeviceFeatureSplitter;
+import recommend.uClickLast.uClickLastFeatureSplitter;
 import search.query.JdbcReader;
 import search.query.QueryRealtimeSplitterBak;
 import utils.ReadConfig;
@@ -83,10 +85,9 @@ public class StreamTest {
       
          
          DataStream<String> myConsumer = env.readTextFile ("C:/Users/zhaoyulong/Downloads/sdkjson.txt");
+         myConsumer.flatMap(new ArtReadFeatureSplitter()).print();
          
-         myConsumer.filter((FilterFunction<String>) log -> {
-             return log.contains(filter1);
-         }).flatMap(new UserDeviceFeatureSplitter()).print();
+       
         	
          
     

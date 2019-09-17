@@ -26,7 +26,7 @@ public class QueryRealtimeRedisSink extends RichSinkFunction<Tuple3<String, Stri
 	        // #jedis最大保存idel状态对象数 #
 	        config.setMaxIdle(Integer.valueOf(ReadConfig.getProperties("jedis.pool.maxIdle")));
 
-	        this.jedisPool = new JedisPool(config, ReadConfig.getProperties("redis.address"),
+	        this.jedisPool = new JedisPool(config, ReadConfig.getProperties("redis.searchRealtimeFeature.address"),
 	                Integer.valueOf(ReadConfig.getProperties("redis.port")),
 	                Integer.valueOf(ReadConfig.getProperties("jedis.pool.timeout")));
 	    }
@@ -43,7 +43,7 @@ public class QueryRealtimeRedisSink extends RichSinkFunction<Tuple3<String, Stri
 	            //line.expire("rqac_" + queryIdkey, 86400);
 	            line.sync();
 	        } catch (Exception e) {
-	            log.error("hset redis error queryId is {} msg is {} ", field, e.getMessage());
+	            log.error("hset redis error queryId is {} msg is {} ", field, e.getMessage(),e);
 	        }
 	    }
 }

@@ -32,7 +32,7 @@ public class QueryRealtimeRedisSink12h extends RichSinkFunction<QueryRealtime.It
 	        // #jedis最大保存idel状态对象数 #
 	        config.setMaxIdle(Integer.valueOf(ReadConfig.getProperties("jedis.pool.maxIdle")));
 
-	        this.jedisPool = new JedisPool(config, ReadConfig.getProperties("redis.address"),
+	        this.jedisPool = new JedisPool(config, ReadConfig.getProperties("redis.searchRealtimeFeature.address"),
 	                Integer.valueOf(ReadConfig.getProperties("redis.port")),
 	                Integer.valueOf(ReadConfig.getProperties("jedis.pool.timeout")));
 	    }

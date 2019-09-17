@@ -127,6 +127,8 @@ public class QueryRealtimeSplitter extends RichFlatMapFunction<String, Tuple5<St
 				if(query == null) {return;}
 				String queryId = getQueryId(Utils.getMD5(query.toUpperCase()));
 				if(queryId == null) {return;}
+				
+				//log.info("qqqq " +msg +" "+query+" "+System.getProperty("file.encoding"));
 				collector.collect(new Tuple5<>(queryId,channelId+"_"+articleId,positionValue,"imp",timestamp));
 			}
 

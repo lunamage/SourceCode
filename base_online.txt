@@ -76,10 +76,11 @@ bin/supervise  -c conf/supervise/quickstart.conf
 http://localhost:9095/datasets/
 
 -----------------------------
-flink savepoint 9f1d5c9e986e3de12bd2639771f65ac4 hdfs://cluster/bi/flink_savepoint -yid application_1564413957136_211810
-
 state.savepoints.dir: hdfs://t-sha1-flk-01:9000/flink-savepoints
+flink cancel -s aa8f2a6b3aba4f598c8348368db6fafe -yid application_1568102798228_11352
 
-flink cancel -s 9f1d5c9e986e3de12bd2639771f65ac4 -yid application_1564413957136_211810
+flink savepoint 1a2c9c71b7a6bc53c8af8c7ac31d5e33 hdfs://cluster/bi/flink_checkpoint -yid application_1566607479137_173092
+hdfs://cluster/bi/flink_checkpoint/savepoint-b4cc3c-088346f039f8
 
-flink run -s hdfs://cluster/bi/flink_savepoint/savepoint-9f1d5c-4ac64dad8076 -m yarn-cluster -c search.query.QueryRealtime -yqu bi -ynm queryRealtime -p 4 -yn 4 -ys 1 -ytm 40480 /data/source/data_warehouse/ga/jar/datastream-1.1.jar &
+flink savepoint b4cc3c8ec2fb7977a23b2acde6e193e9 hdfs://HDFS80727/bi/flink/savepoint -yid application_1566607479137_52043
+flink run -s hdfs://HDFS80727/bi/flink/savepoint/savepoint-460984-1b7d7d08dafb -m yarn-cluster -c search.query.QueryRealtime -yqu bi -ynm queryRealtime -p 4 -yn 4 -ys 1 -ytm 40480 /data/source/data_warehouse/ga/jar/datastream-1.1.jar &

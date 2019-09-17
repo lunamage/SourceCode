@@ -100,8 +100,8 @@ public class QueryRealtime {
  	
          FlinkKafkaConsumer<String> myConsumer = new FlinkKafkaConsumer<>(ReadConfig.getProperties("kafka.topic"), new SimpleStringSchema(), properties);
          
-         myConsumer.setStartFromGroupOffsets();
-         //myConsumer.setStartFromLatest();
+         //myConsumer.setStartFromGroupOffsets();
+         myConsumer.setStartFromLatest();
          KeyedStream<Tuple5<String, String, Double, String, Long>, Tuple> keyedStream = env.addSource(myConsumer).filter((FilterFunction<String>) log -> {
              return log.contains(filter1) && log.contains(filter2);
          }).flatMap(new QueryRealtimeSplitter()).keyBy(0);

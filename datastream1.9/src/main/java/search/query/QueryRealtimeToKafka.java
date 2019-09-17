@@ -7,6 +7,7 @@ import org.apache.flink.api.common.serialization.SimpleStringSchema;
 
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple5;
+import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
 import org.apache.flink.runtime.state.StateBackend;
 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
@@ -22,6 +23,9 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer010;
 import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import search.query.QueryRealtimeToKafka.CalEntity;
+import search.query.QueryRealtimeToKafka.ItemFeatureEntity;
 import utils.ReadConfig;
 
 import java.text.DecimalFormat;
@@ -48,35 +52,32 @@ public class QueryRealtimeToKafka {
     	 StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
          env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
          //
-         env.enableCheckpointing(300000L);
+         env.enableCheckpointing(240000L);
          env.getCheckpointConfig().setMinPauseBetweenCheckpoints(30000L);
          env.getCheckpointConfig().setCheckpointTimeout(1800000L);
          
          env.setStateBackend((StateBackend) new FsStateBackend("hdfs://HDFS80727/bi/flink/checkpoint",true));
-         //env.setStateBackend((StateBackend) new RocksDBStateBackend("hdfs://cluster/bi/flink_checkpoint/searchquery",true));
          ExecutionConfig executionConfig = new ExecutionConfig();
  		 executionConfig.setUseSnapshotCompression(true);
          
          Properties properties = new Properties();
          properties.setProperty("bootstrap.servers",ReadConfig.getProperties("bootstrap.servers"));
          properties.setProperty("group.id", "QueryRealtimeToKafka");
- 	
+
          FlinkKafkaConsumer010<String> myConsumer = new FlinkKafkaConsumer010<>(ReadConfig.getProperties("kafka.topic"), new SimpleStringSchema(), properties);
          
          myConsumer.setStartFromGroupOffsets();
-         //myConsumer.setStartFromLatest();
-         KeyedStream<Tuple5<String, String, Double, String, Long>, Tuple> keyedStream = env.addSource(myConsumer).filter((FilterFunction<String>) log -> {
+         DataStream<Tuple6<String, String, Integer, Double, Integer, Long>> result = env.addSource(myConsumer).filter((FilterFunction<String>) log -> {
              return log.contains(filter1) && log.contains(filter2) || log.contains(filter3) && log.contains(filter4);
-         }).flatMap(new QueryRealtimeSplitter()).keyBy(0);
+         }).flatMap(new QueryRealtimeSplitter()).keyBy(0).timeWindow(Time.minutes(2)).aggregate(new cal(), new WindowResultFunction());
          
-         DataStream<String> t3 = keyedStream.timeWindow(Time.hours(3), Time.seconds(120)).aggregate(new cal(), new WindowResultFunction()).flatMap(new QueryRealtimeFlatMapper3h());
-         DataStream<String> t12 = keyedStream.timeWindow(Time.hours(12), Time.seconds(120)).aggregate(new cal(), new WindowResultFunction()).flatMap(new QueryRealtimeFlatMapper12h());
-         
+         DataStream<String> t3 = result.keyBy(0).timeWindow(Time.hours(3), Time.minutes(4)).aggregate(new cal2(), new WindowResultFunction2()).flatMap(new QueryRealtimeFlatMapper3h());
+         DataStream<String> t12 = result.keyBy(0).timeWindow(Time.hours(12), Time.minutes(4)).aggregate(new cal2(), new WindowResultFunction2()).flatMap(new QueryRealtimeFlatMapper12h());
          
          t3.addSink(new FlinkKafkaProducer010<String>(ReadConfig.getProperties("bootstrap2.servers"),ReadConfig.getProperties("kafka.search.topic"),new SimpleStringSchema())).name("flink-connectors-kafka3");
          t12.addSink(new FlinkKafkaProducer010<String>(ReadConfig.getProperties("bootstrap2.servers"),ReadConfig.getProperties("kafka.search.topic"),new SimpleStringSchema())).name("flink-connectors-kafka12");
 
-         env.execute();
+         env.execute("QueryRealtimeToKafka");
     }
     
     
@@ -86,39 +87,7 @@ public class QueryRealtimeToKafka {
         public int imp = 0;
     }
 
-    public static class ItemFeatureEntity {
-        private String queryId;
-        private Map<String, Object[]> val;
-        private String windowEnd;
-
-        public String getQueryId() {
-            return queryId;
-        }
-
-        public Map<String, Object[]> getVal() {
-            return val;
-        }
-
-        public String getWindowEnd() {
-            return windowEnd;
-        }
-
-        public static ItemFeatureEntity getEntity(String queryId, Map<String, Object[]> val, String windowEnd) {
-        	ItemFeatureEntity entity = new ItemFeatureEntity();
-            entity.queryId = queryId;
-            entity.val = val;
-            entity.windowEnd = windowEnd;
-            return entity;
-        }
-
-		@Override
-		public String toString() {
-			return "ItemFeatureEntity [queryId=" + queryId + ", val=" + val + ", windowEnd=" + windowEnd + "]";
-		}
-        
-    }
-
-    public static class cal implements AggregateFunction<Tuple5<String, String, Double, String, Long>, HashMap<String, CalEntity>, HashMap<String, CalEntity>> {
+   public static class cal implements AggregateFunction<Tuple5<String, String, Double, String, Long>, HashMap<String, CalEntity>, HashMap<String, CalEntity>> {
 
         @Override
         public HashMap<String, CalEntity> createAccumulator() {
@@ -151,7 +120,89 @@ public class QueryRealtimeToKafka {
         }
     }
 
-    public static class WindowResultFunction implements WindowFunction<HashMap<String, CalEntity>, ItemFeatureEntity, Tuple, TimeWindow> {
+    public static class WindowResultFunction implements WindowFunction<HashMap<String, CalEntity>, Tuple6<String, String, Integer, Double, Integer, Long>, Tuple, TimeWindow> {
+        @Override
+        public void apply(Tuple tuple, TimeWindow timeWindow, Iterable<HashMap<String, CalEntity>> entitys, Collector<Tuple6<String, String, Integer, Double, Integer, Long>> collector) {
+            String queryId = tuple.getField(0);
+            Map<String, CalEntity> entity = entitys.iterator().next();
+            Map<String, Object[]> val = new HashMap<>();
+
+            for (Map.Entry<String, CalEntity> map : entity.entrySet()) {
+            	String key = map.getKey();
+            	Integer sl = map.getValue().sl;
+                Double correctSl = map.getValue().correctSl;
+                Integer imp = map.getValue().imp;
+                collector.collect(new Tuple6<String, String, Integer, Double, Integer, Long>(queryId, key, sl, correctSl, imp, timeWindow.getEnd()));
+            }
+        }
+    }
+    
+    
+    
+    public static class cal2 implements AggregateFunction<Tuple6<String, String, Integer, Double, Integer, Long>, HashMap<String, CalEntity>, HashMap<String, CalEntity>> {
+
+        @Override
+        public HashMap<String, CalEntity> createAccumulator() {
+            return new HashMap<>();
+        }
+
+        @Override
+        public HashMap<String, CalEntity> getResult(HashMap<String, CalEntity> o) {
+            return o;
+        }
+
+        @Override
+        public HashMap<String, CalEntity> merge(HashMap<String, CalEntity> entity1, HashMap<String, CalEntity> entity2) {
+            return null;
+        }
+
+        @Override
+        public HashMap<String, CalEntity> add(Tuple6<String, String, Integer, Double, Integer, Long> val, HashMap<String, CalEntity> entity) {
+            if (!entity.containsKey(val.f1)) {
+                entity.put(val.f1, new CalEntity());
+            }
+        	entity.get(val.f1).sl += val.f2;
+            entity.get(val.f1).correctSl += val.f3;
+        	entity.get(val.f1).imp +=val.f4;
+            return entity;
+        }
+    }
+    
+    
+    
+    public static class ItemFeatureEntity {
+        private String queryId;
+        private Map<String, Object[]> val;
+        private String windowEnd;
+
+        public String getQueryId() {
+            return queryId;
+        }
+
+        public Map<String, Object[]> getVal() {
+            return val;
+        }
+
+        public String getWindowEnd() {
+            return windowEnd;
+        }
+
+        public static ItemFeatureEntity getEntity(String queryId, Map<String, Object[]> val, String windowEnd) {
+        	ItemFeatureEntity entity = new ItemFeatureEntity();
+            entity.queryId = queryId;
+            entity.val = val;
+            entity.windowEnd = windowEnd;
+            return entity;
+        }
+
+		@Override
+		public String toString() {
+			return "ItemFeatureEntity [queryId=" + queryId + ", val=" + val + ", windowEnd=" + windowEnd + "]";
+		}
+        
+    }
+    
+    public static class WindowResultFunction2 implements WindowFunction<HashMap<String, CalEntity>, ItemFeatureEntity, Tuple, TimeWindow> {
         @Override
         public void apply(Tuple tuple, TimeWindow timeWindow, Iterable<HashMap<String, CalEntity>> entitys, Collector<ItemFeatureEntity> collector) {
             String queryId = tuple.getField(0);

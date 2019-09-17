@@ -108,7 +108,7 @@ select jie('%E6%B7%98%E7%B3%BB');
 hadoop jar test_mr.jar MapReduce/JsonJobSubmitter /bi/test/test_json /bi/test/test_json_out
 
 rsync -av --progress /data/tmp/zhaoyulong/data/* root@10.9.16.199:/data/machinelearning/data/train_data_data
-rsync -av --progress zyl-0.2.jar bi@azkaban:/data/source/data_warehouse/ga/jar/zyl-0.2.jar
+rsync -av --progress zyl-0.2.jar bi@azkaban-03:/data/source/data_warehouse/ga/jar/zyl-0.2.jar
 rsync -av --progress datastream-1.1.jar bi@azkaban-03:/data/source/data_warehouse/ga/jar/datastream-1.1.jar
 rsync -av --progress DataSet-1.0.jar bi@azkaban-03:/data/source/data_warehouse/ga/jar/DataSet-1.0.jar
 
@@ -173,7 +173,10 @@ keys u1d
 redis-cli -h 10.19.82.107 -p 6379
 
 #搜索
-redis-cli -h 10.19.131.185 -p 6379
+redis-cli -h 10.19.131.185 -p 6379 -a wazhHcz52cchC1IlUF
+
+redis-cli -h 10.19.99.78 -p 6379
+
 keys rqac*
 hgetall "rqac_1119"
 hget "rqac_1119" "51119_3h"
@@ -193,7 +196,7 @@ redis-cli -h 10.19.169.22 -p 6379
 
 yarn-session.sh -n 4 -jm 1024 -tm 4096
 
-yarn logs -applicationId application_1551780685180_1153735 > logs.txt
+yarn logs -applicationId application_1568102798228_3990 > logs.txt
 
 
 yarn application -kill application_1551780685180_522125

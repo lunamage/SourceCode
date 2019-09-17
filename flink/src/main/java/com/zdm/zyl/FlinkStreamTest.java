@@ -10,6 +10,8 @@ import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple4;
+import org.apache.flink.runtime.state.StateBackend;
+import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -43,32 +45,35 @@ public class FlinkStreamTest {
 	
 	private static Logger log = LoggerFactory.getLogger(FlinkStreamTest.class);
 	
-    private final static String IMP_LOG_STATUS = "\"type\":\"show\"";
-    private final static String CLICK_LOG_STATUS = "\"type\":\"event\"";
+    private final static String filter1 = "\"type\":\"tj\"";
+    private final static String filter2 = "\"type\":\"hj\"";
+    private final static String filter3 = "\"type\":\"ss\"";
 
     public static void main(String[] args) throws Exception {
         // 任务名称
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-        env.enableCheckpointing(5000);
+        env.enableCheckpointing(180000);
+        env.setStateBackend((StateBackend) new FsStateBackend("hdfs://cluster/bi/flink_checkpoint",true));
+        
         Properties properties = new Properties();
         properties.setProperty("bootstrap.servers", ReadConfig.getProperties("bootstrap.servers"));
         properties.setProperty("group.id", "zyl-24hfeature");
 
-        FlinkKafkaConsumer<String> myConsumer = new FlinkKafkaConsumer<>(ReadConfig.getProperties("kafka.topic"), new SimpleStringSchema(), properties);
+        FlinkKafkaConsumer<String> myConsumer = new FlinkKafkaConsumer<>(ReadConfig.getProperties("kafka.etl.topic"), new SimpleStringSchema(), properties);
         
         myConsumer.setStartFromLatest();
         //SingleOutputStreamOperator<ItemFeatureEntity> 
         DataStream<ItemFeatureEntity> r = env.addSource(myConsumer)
            .filter((FilterFunction<String>) log -> {
         	   // 过滤出曝光以及点击事件
-        	   return log.contains(IMP_LOG_STATUS) || log.contains(CLICK_LOG_STATUS);})
+        	   return log.contains(filter1) || log.contains(filter2) || log.contains(filter3);})
            .flatMap(new MessageSplitter())
            .assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor<Tuple4<String, String, String, Long>>(Time.seconds(5)) {
         	   @Override
                public long extractTimestamp(Tuple4<String, String, String, Long> tuple4) {return tuple4.f3;}})
            .keyBy(0)
-           .timeWindow(Time.minutes(1))
+           .timeWindow(Time.minutes(3))
            .aggregate(new calImpAndClickAgg(), new WindowResultFunction());
         
         //r.addSink(new RedisSink());

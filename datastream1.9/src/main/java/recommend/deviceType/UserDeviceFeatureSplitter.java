@@ -57,8 +57,10 @@ public class UserDeviceFeatureSplitter extends RichFlatMapFunction<String, Tuple
 			String did = sdk.get("did");
 			String dm = sdk.get("dm");
 			String slt = String.valueOf(sdk.get("slt"));
-			String dt = sdk.get("dt");
-			String nd = sdk.get("nd");
+			//String dt = sdk.get("dt");
+			//String nd = sdk.get("nd");
+			String imei = sdk.get("imei");
+			
 			
 			String key = null;
 			
@@ -67,10 +69,10 @@ public class UserDeviceFeatureSplitter extends RichFlatMapFunction<String, Tuple
 			//异常值处理
 			if(dm == null) {return;}
 			if(uid == null || !uid.matches("^[0-9]+$")) {
-				if(dt.equals("1") || dt.equals("3")) {
+				if(imei.equals("") || imei == null) {
 					key = did;
 				}else {
-					key = nd;
+					key = imei;
 				}
 				
 			}else {

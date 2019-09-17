@@ -78,7 +78,8 @@ public class dimQueryToredis {
 
     	        this.jedisPool = new JedisPool(config, ReadConfig.getProperties("redis.query.address"),
     	                Integer.valueOf(ReadConfig.getProperties("redis.port")),
-    	                Integer.valueOf(ReadConfig.getProperties("jedis.pool.timeout")));
+    	                Integer.valueOf(ReadConfig.getProperties("jedis.pool.timeout")),
+    	                "wazhHcz52cchC1IlUF");
             }
             
             
