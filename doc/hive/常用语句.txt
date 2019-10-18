@@ -1,0 +1,9 @@
+#查看表分区的信息
+desc formatted baoliao PARTITION(dt="2017-05-01");
+desc extended ods_search_log_app partition(day=20160315);
+
+#beeline
+beeline --color=true --fastConnect=true --verbose=true -u 'jdbc:hive2://zk01:2181,zk02:2181,zk03:2181/;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2' --outputformat=vertical -n 'bi' -p ''
+
+#表头
+set hive.cli.print.header=true;

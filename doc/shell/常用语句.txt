@@ -1,0 +1,2 @@
+#查找首列不为DELETE的记录
+cat file | awk -F ' ' '{if($1!="DELETE") print$0}'
