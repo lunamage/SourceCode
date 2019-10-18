@@ -180,7 +180,7 @@ redis-cli -h 10.19.82.107 -p 6379
 hgetall uclicklast_8266856703
 
 
-flink run -m yarn-cluster -c search.query.QueryRealtime -yqu bi -ynm QueryRealtime -p 3 -yn 3 -ys 3 -ytm 215929 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" stream-1.0.jar &
+flink run -s hdfs://HDFS80727/bi/flink/savepoint/savepoint-b09236-aa917f41a359 -m yarn-cluster -c search.query.QueryRealtime -yqu bi -ynm QueryRealtime -p 3 -yn 3 -ys 1 -ytm 155929 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" stream-1.0.jar &
 
 
 
@@ -194,3 +194,19 @@ flink run -s hdfs://cluster/bi/flink_checkpoint/savepoint-1a2c9c-4ef69109531b -q
 
 http://hadoop001:8088/cluster/scheduler
 http://10.45.0.51:5004/cluster/scheduler
+
+
+2019-08-07
+
+
+
+
+
+搜索特征redis（10.19.131.185）之前由于负载较高，取消了持久化；现在已将部分特征迁移，申请增加持久化，请批准。
+
+/usr/hdp/2.6.3.0-235/flink-1.9.0/bin/flink run -m yarn-cluster -c recommend.totalClickEvent.TotalClickEventFeature -ynm TotalClickEventFeature stream-1.0.jar &
+
+
+周二 周四 周会
+
+flink分享

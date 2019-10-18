@@ -1,0 +1,31 @@
+Command line instructions
+
+Git global setup
+git config --global user.name "zhaoyulong"
+git config --global user.email "zhaoyulong@smzdm.com"
+
+Create a new repository
+git clone https://gitlab-team.smzdm.com/smzdm/dw_realtime.git
+cd dw_realtime
+touch README.md
+git add README.md
+git commit -m "init"
+git push -u origin master
+
+Existing folder or Git repository
+cd existing_folder
+git init
+git remote add origin https://gitlab-team.smzdm.com/smzdm/dw_realtime.git
+git remote add origin https://gitlab-team.smzdm.com/smzdm/dw_batch.git
+git add .
+git commit -m "init"
+git push -u origin master
+
+
+git pull --rebase origin master
+echo "[credential]" >> .git/config
+echo "    helper = store" >> .git/config
+git config --list
+
+
+sh /data/gitupdate.sh

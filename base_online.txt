@@ -77,10 +77,30 @@ http://localhost:9095/datasets/
 
 -----------------------------
 state.savepoints.dir: hdfs://t-sha1-flk-01:9000/flink-savepoints
-flink cancel -s aa8f2a6b3aba4f598c8348368db6fafe -yid application_1568102798228_11352
+flink cancel -s b092368fc6b9ca7c653e39b697e08014 -yid application_1568102798228_11360
 
 flink savepoint 1a2c9c71b7a6bc53c8af8c7ac31d5e33 hdfs://cluster/bi/flink_checkpoint -yid application_1566607479137_173092
 hdfs://cluster/bi/flink_checkpoint/savepoint-b4cc3c-088346f039f8
 
 flink savepoint b4cc3c8ec2fb7977a23b2acde6e193e9 hdfs://HDFS80727/bi/flink/savepoint -yid application_1566607479137_52043
 flink run -s hdfs://HDFS80727/bi/flink/savepoint/savepoint-460984-1b7d7d08dafb -m yarn-cluster -c search.query.QueryRealtime -yqu bi -ynm queryRealtime -p 4 -yn 4 -ys 1 -ytm 40480 /data/source/data_warehouse/ga/jar/datastream-1.1.jar &
+
+----
+flink run -q -m yarn-cluster -ynm test -p 1 -yn 1 -ys 1 -ytm 40480 flinksql.jar -w /data/tmp/zhaoyulong -f test.sql &
+
+/data/local/flink-1.9.0/bin/start-cluster.sh
+
+/data/local/flink-1.9.0/bin/sql-client.sh embedded -d /data/tmp/zhaoyulong/config.yaml -l /data/tmp/zhaoyulong/lib
+
+
+flink run -q -m yarn-cluster -ynm test -p 4 -yn 4 -ys 4 -ytm 4096 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" flinksql.jar -w /data/tmp/zhaoyulong/ -f test.sql
+
+
+
+-------------------
+flink run -s hdfs://HDFS80727/bi/flink/savepoint/savepoint-b09236-aa917f41a359 -m yarn-cluster -c search.query.QueryRealtime -yqu bi -ynm QueryRealtime -p 3 -yn 3 -ys 1 -ytm 155929 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" stream-1.0.jar &
+flink run -m yarn-cluster -c recommend.totalClickEvent.TotalClickEventFeature -ynm TotalClickEventFeature -p 2 -yn 2 -ys 2 -ytm 40800 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" stream-1.0.jar &
+
+
+
+/usr/hdp/2.6.3.0-235/flink-1.9.0/bin/flink run -m yarn-cluster -c recommend.totalClickEvent.TotalClickEventFeature -ynm TotalClickEventFeature stream-1.0.jar &

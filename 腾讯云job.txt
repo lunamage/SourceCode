@@ -1,0 +1,4 @@
+--sv lk
+flink run -m yarn-cluster -c recommend.totalClickEvent.TotalClickEventFeature -ynm TotalClickEventFeature -p 2 -yn 2 -ys 2 -ytm 40800 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" stream-1.0.jar &
+--搜索
+flink run -s hdfs://HDFS80727/bi/flink/savepoint/savepoint-b09236-aa917f41a359 -m yarn-cluster -c search.query.QueryRealtime -yqu bi -ynm QueryRealtime -p 3 -yn 3 -ys 1 -ytm 155929 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" stream-1.0.jar &
