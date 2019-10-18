@@ -1,0 +1,12 @@
+sudo systemctl enable docker
+sudo systemctl start docker
+docker-compose up -d
+docker-compose exec sql-client ./sql-client.sh
+
+docker images
+
+docker run -t fhueske/flink-sql-client-training-1.7.2 /bin/bash
+
+
+docker-compose exec sql-client ./sql-client.sh
+docker-compose exec sql-client cat ./sql-client.sh
