@@ -8,11 +8,19 @@
 /usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --max-messages 10
 /usr/hdp/2.6.3.0-235/kafka/bin/kafka-run-class.sh kafka.tools.ConsumerOffsetChecker
 
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic app-sdk-log-simplify-repeat --max-messages 10
+
 #test
 /usr/local/service/flink-1.9.0/bin/start-cluster.sh
 /usr/local/service/flink-1.9.0/bin/sql-client.sh embedded
 
 /usr/hdp/2.6.3.0-235/flink-1.9.0/bin/flink run -m yarn-cluster -c recommend.uClickLast.uClickLastFeature -ynm uClickLastFeature -p 1 stream-1.0.jar &
 /usr/hdp/2.6.3.0-235/flink-1.9.0/bin/flink run -m yarn-cluster -c recmmend.artRead.ArtReadFeature -ynm ArtReadFeature stream-1.0.jar &
+/usr/hdp/2.6.3.0-235/flink-1.9.0/bin/flink run -m yarn-cluster -c recommend.jdEventMaxDate.JDEventMaxDate -ynm JDEventMaxDate stream-1.0.jar &
 
-yarn logs -applicationId application_1565767801119_28396>log.txt
+yarn logs -applicationId application_1568719445207_95462>log.txt
+
+redis-cli -h 10.9.31.154 -p 6379
+
+flink savepoint 5adb05ceb527b20f2c4138ae53596745 hdfs://HDFS80727/bi/flink/savepoint -yid application_1568719445207_149209
+flink run -s hdfs://HDFS80727/bi/flink/savepoint/savepoint-5adb05-c531f0b08a24 -m yarn-cluster -c search.query.QueryRealtime -yqu bi -ynm QueryRealtime -p 8  -yn 4 -ys 2 -ytm 162400 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" /data/tmp/zhaoyulong/stream-1.0.jar &

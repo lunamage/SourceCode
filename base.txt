@@ -48,7 +48,7 @@ select *from bi_test.zyl_tmp_190429_4 order by abtest,cast(sl as int);
 scp /data/jenkins/jobs/stg.tar.gz root@jenkins_new:/data/jenkins/jobs/
 scp -r /data/jenkins root@jenkins_new:/data/jenkins
 
-curl http://hadoop002:19888/jobhistory/attempts/job_1566607479137_413024/m/FAILED
+curl http://hadoop002:19888/jobhistory/attempts/job_1566607479137_630826/m/FAILED
 
 http://106.75.20.192/#/projects
 10.10.172.28
