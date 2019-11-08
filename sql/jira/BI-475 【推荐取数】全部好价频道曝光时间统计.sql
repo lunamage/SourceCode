@@ -21,7 +21,7 @@ where a.dt between '2019-05-20' and '2019-06-05' and a.ec='06' and a.ea='36' and
 create table bi_test.zyl_tmp_190606_2 as
 select id,count(*) sl
 from bi_test.zyl_tmp_190606_1
-group by id;
+group by id; 
 
 create table bi_test.zyl_tmp_190606_3 as
 select id,
