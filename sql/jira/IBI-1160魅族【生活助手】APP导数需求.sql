@@ -15,7 +15,7 @@
 
 
 
-spark-sql --name 'zyl_test' --driver-memory 4g --executor-cores 4 --master yarn --executor-memory 10g --num-executors 30 --conf spark.default.parallelism=300
+spark-sql --name 'zyl_test' --driver-memory 3g --executor-cores 6 --master yarn --executor-memory 6g --num-executors 40 --conf spark.default.parallelism=600 --conf spark.sql.shuffle.partitions=600 --conf spark.driver.maxResultSize=3g --queue bi
 
 
 
@@ -35,11 +35,11 @@ drop table if exists stg_meizu_sdk_log;
 CREATE EXTERNAL TABLE `stg_meizu_sdk_log`(
   `json_data` string COMMENT 'json')
 COMMENT '服务端日志'
-LOCATION '/bi/ori_log/meizu_sdk_log/2019/11/04';
+LOCATION '/bi/ori_log/meizu_sdk_log/2019/12/10';
 
 cache table tmp as select * from bi_test.stg_meizu_sdk_log limit 2;
 
-create table bi_test.zyl_tmp_191105_1  as
+create table bi_test.zyl_tmp_191211_1 as
 select c.p1
 from bi_test.stg_meizu_sdk_log a
 lateral view json_tuple(json_data,'list','slt') b as `list`,slt
@@ -60,3 +60,46 @@ from bi_test.zyl_tmp_191105_1 a
 lateral view json_tuple(a.p1,'ec','ea','el','ecp') b as ec,ea,el,ecp
 lateral view json_tuple(b.ecp,'3','4','5','7','8','9','10','11','18') c as cd3,cd4,cd5,cd7,cd8,cd9,cd10,cd11,cd18
 group by cd3,cd4,cd5,cd7,cd8,cd9,cd10,cd11,cd18,ec,ea,el;
+
+------------------------------------------------------------------
+create table bi_test.zyl_tmp_191211_1 as
+select '2019-12-09' dt,c.p1
+from bi_test.stg_meizu_sdk_log a
+lateral view json_tuple(json_data,'list','slt') b as `list`,slt
+lateral view posexplode(split(regexp_replace(regexp_replace(b.`list`,'\\}\\,\\{\\"ds','\\}\\|\\|\\{\\"ds'),'^\\[|\\]$',''), '\\|\\|')) c as l1,p1;
+
+create table bi_test.zyl_tmp_191211_2 as
+select '2019-12-10' dt,c.p1
+from bi_test.stg_meizu_sdk_log a
+lateral view json_tuple(json_data,'list','slt') b as `list`,slt
+lateral view posexplode(split(regexp_replace(regexp_replace(b.`list`,'\\}\\,\\{\\"ds','\\}\\|\\|\\{\\"ds'),'^\\[|\\]$',''), '\\|\\|')) c as l1,p1;
+
+--dt,type,ec,ea,ecp.15,ecp.10
+insert overwrite local directory '/data/tmp/zhaoyulong/data' row format delimited fields terminated by '\t'
+select a.dt,b.type,b.ec,b.ea,c.cd15,c.cd10,count(*) sl
+from (select dt,p1 from bi_test.zyl_tmp_191211_1 union all select dt,p1 from bi_test.zyl_tmp_191211_2) a
+lateral view json_tuple(a.p1,'ec','ea','type','ecp') b as ec,ea,type,ecp
+lateral view json_tuple(b.ecp,'15','10') c as cd15,cd10
+group by a.dt,b.type,b.ec,b.ea,c.cd15,c.cd10;
+--dt,type,sn，ecp.18,ecp.30
+insert overwrite local directory '/data/tmp/zhaoyulong/data0' row format delimited fields terminated by '\t'
+select a.dt,b.type,b.sn,c.cd18,c.cd30,count(*) sl
+from (select dt,p1 from bi_test.zyl_tmp_191211_1 union all select dt,p1 from bi_test.zyl_tmp_191211_2) a
+lateral view json_tuple(a.p1,'sn','type','ecp') b as sn,type,ecp
+lateral view json_tuple(b.ecp,'18','30') c as cd18,cd30
+group by a.dt,b.type,b.sn,c.cd18,c.cd30;
+--dt，count(distinct did)
+select a.dt,count(*) sl,count(distinct b.did) uv
+from (select dt,p1 from bi_test.zyl_tmp_191211_1 union all select dt,p1 from bi_test.zyl_tmp_191211_2) a
+lateral view json_tuple(a.p1,'did') b as did
+group by a.dt;
+
+--type,ec,ea,ecp.30,ecp.31,ecp.4,ecp.5
+--限制 type=event
+insert overwrite local directory '/data/tmp/zhaoyulong/data' row format delimited fields terminated by '\t'
+select a.dt,b.type,b.ec,b.ea,c.cd30,c.cd31,c.cd4,c.cd5,count(*) sl
+from (select dt,p1 from bi_test.zyl_tmp_191211_1 union all select dt,p1 from bi_test.zyl_tmp_191211_2) a
+lateral view json_tuple(a.p1,'ec','ea','type','ecp') b as ec,ea,type,ecp
+lateral view json_tuple(b.ecp,'30','31','4','5') c as cd30,cd31,cd4,cd5
+where b.type='event'
+group by a.dt,b.type,b.ec,b.ea,c.cd30,c.cd31,c.cd4,c.cd5;

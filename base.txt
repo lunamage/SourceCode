@@ -48,7 +48,7 @@ select *from bi_test.zyl_tmp_190429_4 order by abtest,cast(sl as int);
 scp /data/jenkins/jobs/stg.tar.gz root@jenkins_new:/data/jenkins/jobs/
 scp -r /data/jenkins root@jenkins_new:/data/jenkins
 
-curl http://hadoop002:19888/jobhistory/attempts/job_1566607479137_630826/m/FAILED
+curl http://hadoop002:19888/jobhistory/attempts/job_1575351474088_106403/m/FAILED
 
 http://106.75.20.192/#/projects
 10.10.172.28
@@ -166,6 +166,8 @@ redis-cli -h 10.9.31.154 -p 6379
 redis-cli -h 10.19.82.107 -p 6379
 
 redis-cli -h 10.9.15.111 -p 6379
+
+flushdb
 hgetall u1dimp_6030086746
 
 keys u1d
@@ -196,7 +198,7 @@ redis-cli -h 10.19.169.22 -p 6379
 
 yarn-session.sh -n 4 -jm 1024 -tm 4096
 
-yarn logs -applicationId application_1559641511680_33339 > logs.txt
+yarn logs -applicationId application_1566607479137_709764 > logs.txt
 
 
 yarn application -kill application_1551780685180_522125
@@ -236,3 +238,5 @@ alter table flink_offline set TBLPROPERTIES('EXTERNAL'='true')
 
 ALTER TABLE bi_ods_ga.ods_app_sdk_log ADD COLUMNS (isnp String COMMENT '画像新用户');
 ALTER TABLE bi_ods_ga.ods_app_sdk_log DROP IF EXISTS PARTITION (dt='2019-06-11');
+
+yarn application -movetoqueue  application_1568719445207_164382 -queue bi

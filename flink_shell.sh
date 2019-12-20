@@ -24,3 +24,46 @@ redis-cli -h 10.9.31.154 -p 6379
 
 flink savepoint 5adb05ceb527b20f2c4138ae53596745 hdfs://HDFS80727/bi/flink/savepoint -yid application_1568719445207_149209
 flink run -s hdfs://HDFS80727/bi/flink/savepoint/savepoint-5adb05-c531f0b08a24 -m yarn-cluster -c search.query.QueryRealtime -yqu bi -ynm QueryRealtime -p 8  -yn 4 -ys 2 -ytm 162400 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" /data/tmp/zhaoyulong/stream-1.0.jar &
+
+
+
+
+/usr/hdp/2.6.3.0-235/flink-1.9.0/bin/flink run -m yarn-cluster -c sdk.smzdm.userEvent.UserEvent -ynm UserEvent stream-1.0.jar &
+------------------
+redis-cli -h 10.9.113.78 -p 6379
+auth wazhHcz52cchC1IlUF
+
+redis-cli -h 10.42.16.51 -p 6379
+
+LLEN sendmsg_data
+
+yarn logs -applicationId application_1559641511680_46140>log.txt
+
+/usr/hdp/2.6.3.0-235/flink-1.9.0/bin/flink run -m yarn-cluster -c sdk.smzdm.userEvent.UserEvent -ynm UserEvent stream-1.0.jar &
+
+flink run -m yarn-cluster -c sdk.smzdm.userEvent.UserEvent -yqu bi -ynm UserEvent -p 4 -yn 4 -ys 1 -ytm 20480 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" stream-1.0.jar &
+
+
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --from-beginning|grep 7048145441|grep 添加到购物车
+
+flink savepoint f47c3244f80468c9ab8e300a0bd87eed hdfs://HDFS80727/bi/flink/savepoint -yid application_1568719445207_150038
+flink run -s hdfs://HDFS80727/bi/flink/savepoint/savepoint-f47c32-84e7206db400 -m yarn-cluster -c recommend.report.hourMalltype.HourMalltype -ynm HourMalltype -p 4  -yn 4 -ys 1 -ytm 20400 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" /data/tmp/zhaoyulong/stream-1.0.jar &
+
+
+flink run -m yarn-cluster -c recommend.report.hourMalltype.HourMalltype -ynm HourMalltype -p 16  -yn 4 -ys 4 -ytm 20400 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" /data/tmp/zhaoyulong/stream-1.0.jar &
+
+
+
+/usr/hdp/2.6.3.0-235/flink-1.9.0/bin/flink run -m yarn-cluster -c recommend.userBuyCate4.UserBuyCate4 -ynm UserBuyCate4 stream-1.0.jar &
+
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic zyltest --from-beginning
+
+yarn logs -applicationId application_1575351474088_63333>log.txt
+
+
+/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --bootstrap-server 10.45.1.179:9092  --topic user_buy_cate
+
+k8s
+MallFeature
+uClickLastFeature
+ArtReadFeature

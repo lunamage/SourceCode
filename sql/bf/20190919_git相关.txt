@@ -28,4 +28,21 @@ echo "    helper = store" >> .git/config
 git config --list
 
 
+
+
+
+git init
+git remote add origin  https://gitlab-team.smzdm.com/smzdm/dw_batch.git
+git config core.sparsecheckout true
+echo "/data_warehouse/*" > .git/info/sparse-checkout
+git pull origin master
+
+
+
+#!/bin/bash
+
+cd /data/source
+
+git pull --rebase origin master
+
 sh /data/gitupdate.sh
