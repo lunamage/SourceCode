@@ -1,0 +1,4 @@
+Flink on k8s相比yarn的优势
+1. 更好的资源与网络的隔离性、安全性，更适合多租户
+2. 更容易实现与online service的混合部署，提升集群利用率
+3. 可以受益K8S丰富的生态系统，例如：ETCD，Prometheus

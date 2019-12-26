@@ -240,3 +240,8 @@ ALTER TABLE bi_ods_ga.ods_app_sdk_log ADD COLUMNS (isnp String COMMENT '画像�
 ALTER TABLE bi_ods_ga.ods_app_sdk_log DROP IF EXISTS PARTITION (dt='2019-06-11');
 
 yarn application -movetoqueue  application_1568719445207_164382 -queue bi
+
+----------
+hive --hiveconf hive.cli.print.current.db=true --hiveconf hive.cli.print.header=true --hiveconf hive.execution.engine=tez
+--conf spark.scheduler.listenerbus.eventqueue.capacity=100000
+spark2-sql --name 'zyl_test' --queue bi --driver-memory 4g --executor-cores 6 --master yarn --executor-memory 4g --num-executors 50 --conf spark.default.parallelism=800 --conf spark.sql.shuffle.partitions=800 --conf spark.scheduler.listenerbus.eventqueue.capacity=100000

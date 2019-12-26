@@ -58,7 +58,7 @@ flink run -m yarn-cluster -c recommend.report.hourMalltype.HourMalltype -ynm Hou
 
 /usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic zyltest --from-beginning
 
-yarn logs -applicationId application_1575351474088_63333>log.txt
+yarn logs -applicationId application_1568719445207_444811>log.txt
 
 
 /usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --bootstrap-server 10.45.1.179:9092  --topic user_buy_cate

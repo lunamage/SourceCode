@@ -16,24 +16,21 @@ docker-machine ls
 #阿里加速器 https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors
 sudo sed -i "s|EXTRA_ARGS='|EXTRA_ARGS='--registry-mirror=https://36s3wvt2.mirror.aliyuncs.com |g" /var/lib/boot2docker/profile
 
-
-docker run hello-world
-
-#
-docker run --name mysql-test -e MYSQL_ROOT_PASSWORD=root -d mysql
-docker exec -it mysql-test bash
-mysql -h localhost -u root -p'root'
-
-docker ps
-docker stop 55df3409137e
-
-docker container ls
-
+#查看所有容器
 docker ps -a
 
+#mysql
+docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql:5.6
+docker exec -it mysql-test bash
+mysql -h localhost -u root -p'root'
+#redis
+docker run -p 6379:6379 -d redis redis-server
+docker exec -it 15c580b282b3 redis-cli -h localhost -p 6379
 
+
+###########################################################################
 apt-get update
-apt-get  install vim*
+apt-get install vim*
 
 
 docker login
