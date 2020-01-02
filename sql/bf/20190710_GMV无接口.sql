@@ -1,6 +1,6 @@
-CREATE TABLE t_fact_GMV_offline_191126 LIKE t_fact_GMV_offline;
+CREATE TABLE t_fact_GMV_offline_191230 LIKE t_fact_GMV_offline;
 
-insert into t_fact_GMV_offline_191126 select * from t_fact_GMV_offline;
+insert into t_fact_GMV_offline_191230 select * from t_fact_GMV_offline;
 
 insert into t_fact_GMV_offline
 select a.date_month,a.mall,a.currencytype,a.say,a.dock_name,a.source,a.GMV_Original,

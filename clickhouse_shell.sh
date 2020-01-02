@@ -18,7 +18,7 @@ select toUnixTimestamp('2018-11-25 00:00:02');
 select toDateTime(1543075202);
 
 #同步
-sh /data/source/data_warehouse/ga/script/pub/hdfs_to_clickhouse.sh "hdfs://hadoop001:8020/bi/app_ga/app_sdk_indicators" "10.45.1.125" "app_sdk_indicators" "app_sdk_indicators" "dim1,dim2,dim3,dim4,dim5,dim6,dim7,dim8,dim9,dim10,value,remark,load_date,dim,v,dt" "String,String,String,String,String,String,String,String,String,String,Int64,String,String,String,String,Date" "2019-12-24"
+sh /data/source/data_warehouse/ga/script/pub/hdfs_to_clickhouse.sh "hdfs://hadoop001:8020/bi/app_ga/app_sdk_indicators" "10.45.1.125" "app_sdk_indicators" "app_sdk_indicators" "dim1,dim2,dim3,dim4,dim5,dim6,dim7,dim8,dim9,dim10,value,remark,load_date,dim,v,dt" "String,String,String,String,String,String,String,String,String,String,Int64,String,String,String,String,Date" "2019-12-25"
 
 
 flink run -q -m yarn-cluster -c hdfsToClickhouse.HdfsToClickhouse -yqu bitmp -ynm dfsToClickhouse -yjm 6096 -p 12 -yn 6 -ys 2 -ytm 10240 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" /data/source/data_warehouse/ga/jar/batch-1.0.jar \

@@ -1,10 +1,9 @@
-#启动
-docker-machine ssh default
 #重启
 docker-machine restart default
 #命令停止default虚拟机
 docker-machine stop default
-
+#启动
+docker-machine ssh default
 #查看设备
 docker-machine ls
 
