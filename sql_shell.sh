@@ -1,4 +1,5 @@
 hive --hiveconf hive.cli.print.current.db=true --hiveconf hive.cli.print.header=true --hiveconf hive.execution.engine=tez
+
 --conf spark.scheduler.listenerbus.eventqueue.capacity=100000
 
 spark2-sql --name 'zyl_test' --queue bi --driver-memory 4g --executor-cores 6 --master yarn --executor-memory 8g --num-executors 30 --conf spark.default.parallelism=800 --conf spark.sql.shuffle.partitions=800 --conf spark.scheduler.listenerbus.eventqueue.capacity=100000
