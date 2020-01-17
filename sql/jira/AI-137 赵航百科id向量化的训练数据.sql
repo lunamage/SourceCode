@@ -5,7 +5,7 @@ from (select pro_id,pro_name from stg.db_wiki_product_index where dt='2019-12-16
 left join (select pro_id,max(top_category_id) top_category_id from stg.db_wiki_product_category_v2 where dt='2019-12-16' group by pro_id) b on a.pro_id=b.pro_id;
 
 --2 bi_test.zyl_tmp_191213_1
-create table bi_test.zyl_tmp_191217_1 as
+create table bi_test.zyl_tmp_200109_1 as
 SELECT dt,
 id,
 dim16,
@@ -25,31 +25,31 @@ when hits_appinfo_screenname regexp '长图文|值友说' then 'haowen' end dim,
 dim16
 FROM (
 select dt,id,hits_hitnumber,hits_time,hits_appinfo_screenname,hits_page_hostname,hits_page_pagepath,article_id,hits_type,dim16
-from bi_dw_ga.fact_ga_hits_data WHERE hits_type in('APPVIEW') and dt between '2019-11-20' and '2019-12-16'
+from bi_dw_ga.fact_ga_hits_data WHERE hits_type in('APPVIEW') and dt between '2019-07-01' and '2019-12-16'
 union all
 select dt,id,hits_hitnumber,hits_time,'' hits_appinfo_screenname,hits_page_hostname,hits_page_pagepath,article_id,hits_type,dim16
 from(SELECT row_number() over(partition by dt,id order by cast(hits_hitnumber as int) desc) r,dt,id,hits_hitnumber,hits_time,hits_page_hostname,hits_page_pagepath,article_id,hits_type,dim16
 FROM bi_dw_ga.fact_ga_hits_data
-WHERE dt between '2019-11-20' and '2019-12-16' and hits_type in('EVENT','APPVIEW')) a
+WHERE dt between '2019-07-01' and '2019-12-16' and hits_type in('EVENT','APPVIEW')) a
 where r=1) a) a
 where dim='youhui' and article_id<>'';
 
-create table bi_test.zyl_tmp_191217_2 as
+create table bi_test.zyl_tmp_200109_2 as
 select a.dt,a.id,a.dim16,i.wiki_id,a.timeonscreen
-from bi_test.zyl_tmp_191217_1 a
+from bi_test.zyl_tmp_200109_1 a
 inner join (select article_id,min(meta_value) wiki_id from stg.db_youhui_youhui_meta where dt=date_sub(current_date,1) and meta_key='wiki_id' group by article_id) i on a.article_id=i.article_id
 where cast(i.wiki_id as int)>0 ;
 
-create table bi_test.zyl_tmp_191217_3 as
+create table bi_test.zyl_tmp_200109_3 as
 select a.id,a.dim16,a.wiki_id,a.timeonscreen
-from bi_test.zyl_tmp_191217_2 a
+from bi_test.zyl_tmp_200109_2 a
 inner join(
 select id
-from bi_test.zyl_tmp_191217_2
+from bi_test.zyl_tmp_200109_2
 group by id
 having(count(*)>5)) b on a.id=b.id;
 
-create table bi_test.zyl_tmp_191217_4 as
+create table bi_test.zyl_tmp_200109_4 as
 SELECT concat('{',max(dim16),':{',concat_ws(',',collect_set(concat(wiki_id,':',timeonscreen))),'}}') json
-from bi_test.zyl_tmp_191217_3
+from bi_test.zyl_tmp_200109_3
 group by id;

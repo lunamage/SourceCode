@@ -239,7 +239,7 @@ alter table flink_offline set TBLPROPERTIES('EXTERNAL'='true')
 ALTER TABLE bi_ods_ga.ods_app_sdk_log ADD COLUMNS (isnp String COMMENT '画像新用户');
 ALTER TABLE bi_ods_ga.ods_app_sdk_log DROP IF EXISTS PARTITION (dt='2019-06-11');
 
-yarn application -movetoqueue  application_1568719445207_164382 -queue bi
+yarn application -movetoqueue application_1568719445207_413739 -queue bitmp
 
 ----------
 hive --hiveconf hive.cli.print.current.db=true --hiveconf hive.cli.print.header=true --hiveconf hive.execution.engine=tez
