@@ -20,7 +20,7 @@
 /usr/hdp/2.6.3.0-235/flink-1.9.0/bin/flink run -m yarn-cluster -c recommend.artRead.ArtReadFeatureNew -ynm ArtReadFeatureNew stream-1.0.jar --istest 1 &
 /usr/hdp/2.6.3.0-235/flink-1.9.0/bin/flink run -m yarn-cluster -c recommend.jdEventMaxDate.JDEventMaxDate -ynm JDEventMaxDate stream-1.0.jar --istest 1 &
 
-yarn logs -applicationId application_1568719445207_564036>log.txt
+yarn logs -applicationId application_1568719445207_588611>log.txt
 
 redis-cli -h 10.19.99.78 -p 6379
 
