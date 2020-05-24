@@ -1,0 +1,67 @@
+presto --server 10.45.2.55:9000 --catalog kudu --schema default
+
+presto --server ip:port --catalog=xxx --user=xxx --execute '需要导出的sql查询命令' --output-format CSV > xxx.csv
+
+use kudu.default;
+
+
+
+CREATE TABLE kudu.default.dim_sku_cate (
+website_id varchar  WITH ( primary_key = true ),
+sku_id varchar WITH ( primary_key = true ),
+cate_id1 varchar,
+cate_id2 varchar,
+cate_id3 varchar,
+load_date varchar comment '数据更新时间'
+)
+ WITH (number_of_replicas = 3,
+partition_by_hash_buckets = 10,
+partition_by_hash_columns = ARRAY['website_id','sku_id']
+);
+
+
+select count(*) from dim_isvcode;
+
+select count(*) from dim_isvcode where id like '%jd%'  limit 10;
+
+
+select * from dim_isvcode where content like '%utm_source%' limit 10;
+
+select * from dim_isvcode where id='jd115705490269';
+select * from dim_isvcode where id='61d3680b427c0009';
+
+select * from dim_isvcode where id like '%jd119%'  limit 10;
+
+select * from order_all where mall_id='600233_2' order by order_time desc limit 10;
+select * from order_all where order_id='35144699924';
+select order_time,mall_id,order_id,isvcode from order_all where order_time>'2020-05-20' order by order_time desc limit 10;
+
+select mall_id,website_id from order_all where mall_id like '%600364%' and order_time>'2020-05-23'  limit 10;
+
+
+select * from olap_order where order_id='115705490269';
+select count(*) from olap_order where order_date='2020-05-20' limit 10;
+select distinct mall,website_id from olap_order where order_date='2020-05-20' limit 20;
+
+select api_time,order_time,mall,order_id,isvcode,load_date from olap_order where order_date='2020-05-22' order by load_date desc limit 10;
+
+
+select mall_id,count(*) from order_all where order_time>'2020-05-20' and order_time<'2020-05-20 23:59:59' group by mall_id order by mall_id;
+select mall_id,mall,count(*) from olap_order where order_time>'2020-05-20' and order_time<'2020-05-20 23:59:59' group by mall_id,mall order by mall_id;
+
+select substr(order_time,1,13) order_time,count(*)
+from olap_order
+where order_date='2020-05-20' and mall='京东'
+group by substr(order_time,1,13)
+order by order_time;
+
+select api_time,order_time,load_date
+from olap_order
+where order_date='2020-05-20' and mall='京东'
+order by load_date desc limit 10;
+
+
+select api_time,order_time,load_date
+from olap_order
+where order_date='2020-05-20' and mall='淘系'
+order by load_date desc limit 10;

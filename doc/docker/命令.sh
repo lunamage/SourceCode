@@ -53,6 +53,21 @@ docker restart maxwell
 ##
 docker run -it --name ververica -d fintechstudios/ververica-platform-k8s-operator
 
+##kudu
+docker build -t kunickiaj/kudu .
+docker create --name kudu-master-data -v /var/lib/kudu/master kunickiaj/kudu
+docker create --name kudu-tserver-data -v /var/lib/kudu/tserver kunickiaj/kudu
+docker run -d --name kudu-master -p 8051:8051 -p 7051:7051 kunickiaj/kudu master
+docker run -d --name kudu-tserver -p 8050:8050 -p 7050:7050 --link kudu-master -e KUDU_MASTER=kudu-master kunickiaj/kudu tserver
+docker run --rm -it --link kudu-tserver -e KUDU_TSERVER=kudu-tserver kunickiaj/kudu kudu tserver status kudu-tserver
+#
+export KUDU_QUICKSTART_IP=$(ifconfig | grep "inet " | grep -Fv 127.0.0.1 |  awk '{print $2}' | tail -1)
+docker-compose -f quickstart.yml up
+localhost:7051,localhost:7151,localhost:7251
+
+docker rm $(docker ps -a -q)
+docker volume rm $(docker volume ls -qf dangling=true)
+
 ###############
 docker network create testnet
 

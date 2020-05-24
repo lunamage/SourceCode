@@ -24,13 +24,14 @@
 /usr/hdp/2.6.3.0-235/flink-1.9.0/bin/flink run -m yarn-cluster -c recommend.article.cmsTop.CmsTopFeature -ynm CmsTopFeature stream-1.0.jar --istest 1 &
 
 
-yarn logs -applicationId application_1579511008386_569291>log.txt
+
 yarn logs -applicationId application_1579511008386_443175>log.txt
+yarn logs -applicationId application_1579511008386_749003|less
 
 
 redis-cli -h 10.42.168.37 -p 6379
 
-flink savepoint 5adb05ceb527b20f2c4138ae53596745 hdfs://HDFS80727/bi/flink/savepoint -yid application_1568719445207_149209
+flink savepoint 48cb321a7a74eb57a772d165c2704fbc hdfs://HDFS80727/bi/flink/savepoint -yid application_1579511008386_754935
 flink run -s hdfs://HDFS80727/bi/flink/savepoint/savepoint-5adb05-c531f0b08a24 -m yarn-cluster -c search.query.QueryRealtime -yqu bi -ynm QueryRealtime -p 8  -yn 4 -ys 2 -ytm 162400 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" /data/tmp/zhaoyulong/stream-1.0.jar &
 
 
