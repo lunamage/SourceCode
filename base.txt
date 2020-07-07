@@ -48,10 +48,10 @@ select * from bi_test.zyl_tmp_190429_4 order by abtest,cast(sl as int);
 scp /data/jenkins/jobs/stg.tar.gz root@jenkins_new:/data/jenkins/jobs/
 scp -r /data/jenkins root@jenkins_new:/data/jenkins
 
-curl http://hadoop002:19888/jobhistory/attempts/job_1588207119528_34443/m/FAILED
+curl http://hadoop002:19888/jobhistory/attempts/job_1588207119528_43914/m/FAILED
 
 腾讯云
-curl http://10.45.1.122:5024/jobhistory/attempts/job_1579511008386_719772/m/FAILED
+curl http://10.45.1.122:5024/jobhistory/attempts/job_1588492312649_547863/m/FAILED
 
 http://106.75.20.192/#/projects
 10.10.172.28

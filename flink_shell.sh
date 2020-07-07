@@ -25,11 +25,11 @@
 
 
 
-yarn logs -applicationId application_1579511008386_443175>log.txt
+yarn logs -applicationId application_1588492312649_365451>log.txt
 yarn logs -applicationId application_1579511008386_749003|less
 
 
-redis-cli -h 10.42.168.37 -p 6379
+redis-cli -h 10.45.3.110 -p 6379
 
 flink savepoint 48cb321a7a74eb57a772d165c2704fbc hdfs://HDFS80727/bi/flink/savepoint -yid application_1579511008386_754935
 flink run -s hdfs://HDFS80727/bi/flink/savepoint/savepoint-5adb05-c531f0b08a24 -m yarn-cluster -c search.query.QueryRealtime -yqu bi -ynm QueryRealtime -p 8  -yn 4 -ys 2 -ytm 162400 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" /data/tmp/zhaoyulong/stream-1.0.jar &
@@ -39,14 +39,14 @@ flink run -s hdfs://HDFS80727/bi/flink/savepoint/savepoint-5adb05-c531f0b08a24 -
 
 /usr/hdp/2.6.3.0-235/flink-1.9.0/bin/flink run -m yarn-cluster -c sdk.smzdm.userEvent.UserEvent -ynm UserEvent stream-1.0.jar &
 ------------------
-redis-cli -h 10.10.157.160 -p 6379
+redis-cli -h 10.45.3.110 -p 6379
 auth wazhHcz52cchC1IlUF
 
 redis-cli -h 10.19.99.78 -p 6379
 
 LLEN sendmsg_data
 
-yarn logs -applicationId application_1577083835688_5214>log.txt
+yarn logs -applicationId application_1588492312649_323631>log.txt
 
 /usr/hdp/2.6.3.0-235/flink-1.9.0/bin/flink run -m yarn-cluster -c sdk.smzdm.userEvent.UserEvent -ynm UserEvent stream-1.0.jar &
 
@@ -55,7 +55,7 @@ flink run -m yarn-cluster -c sdk.smzdm.userEvent.UserEvent -yqu bi -ynm UserEven
 
 /usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --from-beginning|grep 7048145441|grep 添加到购物车
 
-flink savepoint f47c3244f80468c9ab8e300a0bd87eed hdfs://HDFS80727/bi/flink/savepoint -yid application_1568719445207_150038
+flink savepoint 848d9088bf7c4354dc7fba200b900f1f hdfs://HDFS80727/bi/flink/savepoint -yid application_1588492312649_284291
 flink run -s hdfs://HDFS80727/bi/flink/savepoint/savepoint-f47c32-84e7206db400 -m yarn-cluster -c recommend.report.hourMalltype.HourMalltype -ynm HourMalltype -p 4  -yn 4 -ys 1 -ytm 20400 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" /data/tmp/zhaoyulong/stream-1.0.jar &
 
 

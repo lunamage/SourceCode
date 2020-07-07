@@ -1,6 +1,8 @@
 presto --server 10.45.2.55:9000 --catalog kudu --schema default
 
-presto --server ip:port --catalog=xxx --user=xxx --execute '需要导出的sql查询命令' --output-format CSV > xxx.csv
+presto --server 10.45.2.55:9000 --catalog kudu --schema default --execute "select order_id,sku_id,order_time,mid_ab,mid_wz,gmv_rmb,cps_rmb,mid_sys,status,sku_price,sku_qty,commission_rate,sku_list from olap_goods where mall='淘系' and order_date='2020-05-24' limit 10;" --output-format CSV > /data/tmp/zhaoyulong/abc.csv
+
+
 
 use kudu.default;
 
@@ -65,3 +67,7 @@ select api_time,order_time,load_date
 from olap_order
 where order_date='2020-05-20' and mall='淘系'
 order by load_date desc limit 10;
+
+
+CALL kudu.system.add_range_partition('default', 'olap_order', '{"lower": "2019-07", "upper": "2019-09"}');
+CALL kudu.system.drop_range_partition('default', 'olap_order', '{"lower":null,"upper":"2020-01"}');

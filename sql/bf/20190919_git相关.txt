@@ -21,7 +21,6 @@ git add .
 git commit -m "init"
 git push -u origin master
 
-
 git pull --rebase origin master
 echo "[credential]" >> .git/config
 echo "    helper = store" >> .git/config
