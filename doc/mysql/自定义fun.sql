@@ -1,0 +1,24 @@
+use app;
+delimiter $
+create function gmv_insert() returns int
+begin
+    declare c int;
+    set c=(select 1);
+    insert into dev_ga_data_warehouse.t_fact_GMV_offline
+	select a.date_month,a.mall,a.currencytype,a.say,a.dock_name,a.source,a.GMV_Original,
+	case a.currencytype when '人民币' then 1 else c.Rate end currencyrate,
+	case a.say when '结算' then case a.currencytype when '人民币' then a.GMV_Original*1.1 else round(a.GMV_Original*c.Rate*1.1,2) end
+	else case a.currencytype when '人民币' then a.GMV_Original else round(a.GMV_Original*c.Rate,2) end end GMV,
+	now() load_date,0,a.business,a.region,a.category
+	from dev_ga_data_warehouse.t_temp_GMV_offline a
+	left join dev_ga_data_warehouse.t_dim_GMV_smzdm_CurrencyType b on a.currencytype = b.Currency_name
+	left join dev_ga_data_warehouse.t_dim_smzdm_CurrencyRate c on concat(a.date_month,'-01')=c.date and b.Currency_id = c.Currency_id;
+    return c;
+end$
+
+delimiter ;
+
+select myselect3();
+
+
+show function status

@@ -25,7 +25,7 @@
 
 
 
-yarn logs -applicationId application_1588492312649_365451>log.txt
+yarn logs -applicationId application_1588492312649_608599>log.txt
 yarn logs -applicationId application_1579511008386_749003|less
 
 
@@ -111,4 +111,4 @@ CREATE TABLE sdk_log (
 /data/local/flink-1.10.0/bin/flink run -m yarn-cluster -yqu bitmp -ynm sqltest -p 2 -ys 2 -ytm 12288 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" /data/tmp/zhaoyulong/test/flinksql-1.1.jar --f /data/tmp/zhaoyulong/test/a1.sql &
 
 redis-cli -h 10.42.168.37 -p 6379
-hget tmp_tj bg_1m
+redis-cli -h 10.42.168.37 keys "*" | xargs redis-cli -h 10.42.168.37 del
