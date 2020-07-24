@@ -1,4 +1,4 @@
-CREATE TABLE t_fact_GMV_offline_200714 LIKE t_fact_GMV_offline;
+CREATE TABLE dev_ga_data_warehouse.t_fact_GMV_offline_200720 LIKE dev_ga_data_warehouse.t_fact_GMV_offline;
 
 insert into t_fact_GMV_offline_200714 select * from t_fact_GMV_offline;
 
