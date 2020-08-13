@@ -78,7 +78,7 @@ a.rating,
 a.comment,
 a.favorites,
 a.shang,
-a.shang,
+a.share,
 if(b1.user_id is null,0,1) retention_1,
 if(b2.user_id is null,0,1) retention_2,
 if(b3.user_id is null,0,1) retention_3,
@@ -87,11 +87,11 @@ if(b5.user_id is null,0,1) retention_5,
 if(b6.user_id is null,0,1) retention_6,
 if(b7.user_id is null,0,1) retention_7
 from bi_test.zyl_tmp_200723_2 a
-left join bi_test.zyl_tmp_200723_1 b1 on a.smzdm_id=b.user_id and a.dt=date_add(b.dt,1)
-left join bi_test.zyl_tmp_200723_1 b2 on a.smzdm_id=b.user_id and a.dt=date_add(b.dt,2)
-left join bi_test.zyl_tmp_200723_1 b3 on a.smzdm_id=b.user_id and a.dt=date_add(b.dt,3)
-left join bi_test.zyl_tmp_200723_1 b4 on a.smzdm_id=b.user_id and a.dt=date_add(b.dt,4)
-left join bi_test.zyl_tmp_200723_1 b5 on a.smzdm_id=b.user_id and a.dt=date_add(b.dt,5)
-left join bi_test.zyl_tmp_200723_1 b6 on a.smzdm_id=b.user_id and a.dt=date_add(b.dt,6)
-left join bi_test.zyl_tmp_200723_1 b7 on a.smzdm_id=b.user_id and a.dt=date_add(b.dt,7);
+left join bi_test.zyl_tmp_200723_1 b1 on a.smzdm_id=b1.user_id and a.dt=date_add(b1.dt,1)
+left join bi_test.zyl_tmp_200723_1 b2 on a.smzdm_id=b2.user_id and a.dt=date_add(b2.dt,2)
+left join bi_test.zyl_tmp_200723_1 b3 on a.smzdm_id=b3.user_id and a.dt=date_add(b3.dt,3)
+left join bi_test.zyl_tmp_200723_1 b4 on a.smzdm_id=b4.user_id and a.dt=date_add(b4.dt,4)
+left join bi_test.zyl_tmp_200723_1 b5 on a.smzdm_id=b5.user_id and a.dt=date_add(b5.dt,5)
+left join bi_test.zyl_tmp_200723_1 b6 on a.smzdm_id=b6.user_id and a.dt=date_add(b6.dt,6)
+left join bi_test.zyl_tmp_200723_1 b7 on a.smzdm_id=b7.user_id and a.dt=date_add(b7.dt,7);
 --spark2-sql --jars /data/source/data_warehouse/pub_jar/mysql-connector-java-commercial-5.1.40-bin.jar --driver-class-path /data/source/data_warehouse/pub_jar/mysql-connector-java-commercial-5.1.40-bin.jar --name 'zyl_test' --queue bi --driver-memory 4g --executor-cores 6 --master yarn --executor-memory 20g --num-executors 20 --conf spark.default.parallelism=800 --conf spark.sql.shuffle.partitions=800 --conf spark.scheduler.listenerbus.eventqueue.capacity=100000

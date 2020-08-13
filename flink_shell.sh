@@ -25,14 +25,17 @@
 
 
 
-yarn logs -applicationId application_1588492312649_608599>log.txt
-yarn logs -applicationId application_1579511008386_749003|less
+yarn logs -applicationId application_1588492312649_783578>log.txt
+yarn logs -applicationId application_1588492312649_791126|less
 
 
 redis-cli -h 10.45.3.110 -p 6379
 
 flink savepoint 48cb321a7a74eb57a772d165c2704fbc hdfs://HDFS80727/bi/flink/savepoint -yid application_1579511008386_754935
 flink run -s hdfs://HDFS80727/bi/flink/savepoint/savepoint-5adb05-c531f0b08a24 -m yarn-cluster -c search.query.QueryRealtime -yqu bi -ynm QueryRealtime -p 8  -yn 4 -ys 2 -ytm 162400 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" /data/tmp/zhaoyulong/stream-1.0.jar &
+
+/data/local/flink-1.11.1/bin/flink savepoint b2f1fc410e6b78b164a3e38a219a55b8 hdfs://HDFS80727/bi/flink/savepoint -yid application_1588492312649_743211
+
 
 
 
@@ -112,3 +115,12 @@ CREATE TABLE sdk_log (
 
 redis-cli -h 10.42.168.37 -p 6379
 redis-cli -h 10.42.168.37 keys "*" | xargs redis-cli -h 10.42.168.37 del
+
+
+
+/data/local/flink-1.11.1/bin/sql-client.sh embedded -l /data/tmp/zhaoyulong/test2/
+
+/data/local/flink-1.11.0/bin/stop-cluster.sh
+/data/local/flink-1.10.0/bin/stop-cluster.sh
+/data/local/flink-1.9.0/bin/stop-cluster.sh
+/data/local/flink-1.11.1/bin/start-cluster.sh

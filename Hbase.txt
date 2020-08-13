@@ -34,3 +34,17 @@ jumpserver-itoamms.smzdm.com
 
 
 select * from "hbase_table" where "ck" regexp 'ab_pv' order by "dim1","dim2";
+
+-------------
+hbase shell
+create_namespace 'gmv'
+create 'gmv:dim_isvcode', 'cf1'
+scan 'gmv:dim_isvcode', {LIMIT=>5}
+
+scan 'gmv:dim_isvcode',{FILTER=>"ValueFilter(=,'substring:dj')",LIMIT=>5}
+
+
+import org.apache.hadoop.hbase.filter.CompareFilter
+import org.apache.hadoop.hbase.filter.SubstringComparator
+import org.apache.hadoop.hbase.filter.RowFilter
+scan 'gmv:dim_isvcode', {FILTER => RowFilter.new(CompareFilter::CompareOp.valueOf('EQUAL'), SubstringComparator.new('dj')),LIMIT=>5}  
