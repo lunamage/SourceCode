@@ -17,16 +17,26 @@ cd existing_folder
 git init
 git remote add origin https://gitlab-team.smzdm.com/smzdm/dw_realtime.git
 git remote add origin https://gitlab-team.smzdm.com/smzdm/dw_batch.git
+
+git clone https://gitlab-team.smzdm.com/smzdm/dw_batch.git
+git pull origin master
+
 git add .
 git commit -m "init"
 git push -u origin master
+
 
 git pull --rebase origin master
 echo "[credential]" >> .git/config
 echo "    helper = store" >> .git/config
 git config --list
-
-
+--------------------------------------
+--清除大文件
+git filter-branch --force --index-filter "git rm --cached --ignore-unmatch 'data_warehouse/ga/jar/*'"  --prune-empty --tag-name-filter cat -- --all
+git push --force --all
+rm -rf .git/refs/original/
+git reflog expire --expire=now --all
+git gc --prune=now
 
 
 

@@ -1,17 +1,17 @@
 #kafka
-/usr/hdp/2.6.3.0-235/kafka/bin/kafka-topics.sh --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181 --list
-/usr/hdp/2.6.3.0-235/kafka/bin/kafka-topics.sh --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181 --describe --topic app-sdk-log
-/usr/hdp/2.6.3.0-235/kafka/bin/kafka-topics.sh --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181 --create --topic zyltest --partitions 1  --replication-factor 1
-/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-producer.sh --broker-list hadoop001:6667,hadoop002:6667,hadoop003:6667 --topic zyltest
-/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --from-beginning|grep 推送点击|grep 70062968
-/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --from-beginning|grep 5786557172|grep 搜索|grep 点击
-/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --max-messages 10
-/usr/hdp/2.6.3.0-235/kafka/bin/kafka-run-class.sh kafka.tools.ConsumerOffsetChecker
+/data/local/kafka_2.10-0.10.1.1/bin/kafka-topics.sh --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181 --list
+/data/local/kafka_2.10-0.10.1.1/bin/kafka-topics.sh --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181 --describe --topic app-sdk-log
+/data/local/kafka_2.10-0.10.1.1/bin/kafka-topics.sh --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181 --create --topic zyltest --partitions 1  --replication-factor 1
+/data/local/kafka_2.10-0.10.1.1/bin/kafka-console-producer.sh --broker-list hadoop001:6667,hadoop002:6667,hadoop003:6667 --topic zyltest
+/data/local/kafka_2.10-0.10.1.1/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --from-beginning|grep 推送点击|grep 70062968
+/data/local/kafka_2.10-0.10.1.1/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --from-beginning|grep 5786557172|grep 搜索|grep 点击
+/data/local/kafka_2.10-0.10.1.1/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --max-messages 10
+/data/local/kafka_2.10-0.10.1.1/bin/kafka-run-class.sh kafka.tools.ConsumerOffsetChecker
 
-/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic app-sdk-log-simplify-repeat --max-messages 10
+/data/local/kafka_2.10-0.10.1.1/bin/kafka-console-consumer.sh --bootstrap-server 10.45.1.179:9092 --topic gmv_olap_order --max-messages 10
 
 
-/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-producer.sh --broker-list hadoop001:6667,hadoop002:6667,hadoop003:6667 --topic analytics-zcollect --max-messages 10
+/data/local/kafka_2.10-0.10.1.1/bin/kafka-console-producer.sh --broker-list hadoop001:6667,hadoop002:6667,hadoop003:6667 --topic analytics-zcollect --max-messages 10
 #test
 /usr/local/service/flink-1.9.0/bin/start-cluster.sh
 /usr/local/service/flink-1.9.0/bin/sql-client.sh embedded
@@ -26,7 +26,7 @@
 
 
 yarn logs -applicationId application_1588492312649_783578>log.txt
-yarn logs -applicationId application_1588492312649_791126|less
+yarn logs -applicationId application_1588492312649_977819|less
 
 
 redis-cli -h 10.45.3.110 -p 6379
@@ -56,7 +56,7 @@ yarn logs -applicationId application_1588492312649_323631>log.txt
 flink run -m yarn-cluster -c sdk.smzdm.userEvent.UserEvent -yqu bi -ynm UserEvent -p 4 -yn 4 -ys 1 -ytm 20480 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" stream-1.0.jar &
 
 
-/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --from-beginning|grep 7048145441|grep 添加到购物车
+/data/local/kafka_2.10-0.10.1.1/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic analytics-zcollect --from-beginning|grep 7048145441|grep 添加到购物车
 
 flink savepoint 848d9088bf7c4354dc7fba200b900f1f hdfs://HDFS80727/bi/flink/savepoint -yid application_1588492312649_284291
 flink run -s hdfs://HDFS80727/bi/flink/savepoint/savepoint-f47c32-84e7206db400 -m yarn-cluster -c recommend.report.hourMalltype.HourMalltype -ynm HourMalltype -p 4  -yn 4 -ys 1 -ytm 20400 -yD env.java.opts="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" /data/tmp/zhaoyulong/stream-1.0.jar &
@@ -68,12 +68,12 @@ flink run -m yarn-cluster -c recommend.report.hourMalltype.HourMalltype -ynm Hou
 
 /usr/hdp/2.6.3.0-235/flink-1.9.0/bin/flink run -m yarn-cluster -c recommend.userBuyCate4.UserBuyCate4 -ynm UserBuyCate4 stream-1.0.jar &
 
-/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic zyltest --from-beginning
+/data/local/kafka_2.10-0.10.1.1/bin/kafka-console-consumer.sh  --zookeeper hadoop001:2181,hadoop002:2181,hadoop003:2181  --topic zyltest --from-beginning
 
 yarn logs -applicationId application_1579511008386_361723>log.txt
 
 
-/usr/hdp/2.6.3.0-235/kafka/bin/kafka-console-consumer.sh  --bootstrap-server 10.45.1.179:9092  --topic user_buy_cate
+/data/local/kafka_2.10-0.10.1.1/bin/kafka-console-consumer.sh  --bootstrap-server 10.45.1.179:9092  --topic user_buy_cate
 
 k8s
 MallFeature
@@ -115,6 +115,7 @@ CREATE TABLE sdk_log (
 
 redis-cli -h 10.42.168.37 -p 6379
 redis-cli -h 10.42.168.37 keys "*" | xargs redis-cli -h 10.42.168.37 del
+redis-cli -h 10.42.126.216 -a wazhHcz52cchC1IlUF  keys "tmp*" | xargs redis-cli -h 10.42.126.216 -a wazhHcz52cchC1IlUF del
 
 
 
@@ -124,3 +125,6 @@ redis-cli -h 10.42.168.37 keys "*" | xargs redis-cli -h 10.42.168.37 del
 /data/local/flink-1.10.0/bin/stop-cluster.sh
 /data/local/flink-1.9.0/bin/stop-cluster.sh
 /data/local/flink-1.11.1/bin/start-cluster.sh
+
+
+scan 0 match ta* count 10
