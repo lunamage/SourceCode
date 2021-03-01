@@ -42,7 +42,9 @@ create 'gmv:dim_isvcode', 'cf1'
 scan 'youhui', {LIMIT=>5}
 get 'table_name','row-1'
 scan 'gmv:dim_isvcode',{FILTER=>"ValueFilter(=,'substring:dj')",LIMIT=>5}
-get 'bigwidetable','25472667'
+get 'bigwidetable','27228767'
+get 'gmv:dim_isvcode','996736482831dj'
+
 
 import org.apache.hadoop.hbase.filter.CompareFilter
 import org.apache.hadoop.hbase.filter.SubstringComparator

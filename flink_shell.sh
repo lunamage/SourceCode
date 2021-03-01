@@ -12,6 +12,13 @@
 
 
 /data/local/kafka_2.10-0.10.1.1/bin/kafka-console-producer.sh --broker-list hadoop001:6667,hadoop002:6667,hadoop003:6667 --topic analytics-zcollect --max-messages 10
+/data/local/kafka_2.10-0.10.1.1/bin/kafka-console-consumer.sh --bootstrap-server 10.45.4.146:9092 --topic youhui --from-beginning |grep youhui_meta |grep 26515904 > log.txt
+
+
+/data/local/kafka_2.10-0.10.1.1/bin/kafka-topics.sh --zookeeper 10.10.49.125:2181 --list
+/data/local/kafka_2.10-0.10.1.1/bin/kafka-topics.sh --zookeeper 10.10.49.125:2181 --create --topic olap_rec_article_sdk_gmv_t55 --partitions 1  --replication-factor 1
+
+
 #test
 /usr/local/service/flink-1.9.0/bin/start-cluster.sh
 /usr/local/service/flink-1.9.0/bin/sql-client.sh embedded
@@ -22,6 +29,7 @@
 /usr/hdp/2.6.3.0-235/flink-1.9.0/bin/flink run -m yarn-cluster -c sdk.smzdm.pushOpen.PushOpen -ynm PushOpen stream-1.0.jar --istest 1 &
 /usr/hdp/2.6.3.0-235/flink-1.9.0/bin/flink run -m yarn-cluster -c recommend.artKind.ArtKindFeature -ynm ArtKindFeature stream-1.0.jar --istest 1 &
 /usr/hdp/2.6.3.0-235/flink-1.9.0/bin/flink run -m yarn-cluster -c recommend.article.cmsTop.CmsTopFeature -ynm CmsTopFeature stream-1.0.jar --istest 1 &
+/data/local/kafka_2.10-0.10.1.1/bin/kafka-console-consumer.sh --bootstrap-server 10.10.49.125:9092,10.10.31.23:9092,10.10.182.32:9092 --topic olap_rec_article_sdk_gmv_t55 --max-messages 10
 
 
 

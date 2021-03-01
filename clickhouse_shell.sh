@@ -33,3 +33,31 @@ flink run -q -m yarn-cluster -c hdfsToClickhouse.HdfsToClickhouse -yqu bitmp -yn
 
 
 yarn logs -applicationId application_1568719445207_450415>log.txt
+
+
+
+
+###
+CREATE TABLE IF not EXISTS bi_rep.app_ga_search_top_ctr on cluster default_cluster (
+  `stat_dt` Nullable(String),
+  `query` Nullable(String),
+  `type` Nullable(String),
+  `top_click` Nullable(Int64),
+  `search_count` Nullable(Int64),
+  `search_click` Nullable(Int64),
+  `load_date` Nullable(String),
+  `dt` Date
+  )
+ENGINE = ReplicatedMergeTree('/clickhouse/tables/{layer}-{shard}/bi_rep.app_ga_search_top_ctr', '{replica}')
+ORDER BY dt;
+
+drop table bi_app.dim_youhui on cluster default_cluster;
+CREATE TABLE IF not EXISTS bi_app.app_ga_search_top_ctr on cluster default_cluster AS bi_rep.app_ga_search_top_ctr ENGINE = Distributed(default_cluster, bi_rep, app_ga_search_top_ctr, rand());
+
+OPTIMIZE TABLE bi_rep.app_ga_search_top_ctr on cluster default_cluster final;
+
+ALTER TABLE bi_rep.dim_youhui on cluster default_cluster  ADD COLUMN load_date Nullable(String) ;
+ALTER TABLE bi_rep.dim_youhui on cluster default_cluster  ADD COLUMN load_date Nullable(String) ;
+
+ALTER TABLE kudu.default.olap_order RENAME COLUMN mall_desc TO order_ext;
+ALTER TABLE kudu.default.olap_goods RENAME COLUMN mall_desc TO order_ext;

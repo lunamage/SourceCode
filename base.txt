@@ -278,4 +278,4 @@ hadoop distcp -D mapreduce.map.memory.mb=4096 -D mapreduce.map.java.opts=-Xmx300
 
 hadoop distcp -D mapreduce.map.memory.mb=4096 -D mapreduce.map.java.opts=-Xmx3000M -D mapreduce.reduce.memory.mb=8192 -D mapreduce.reduce.java.opts=-Xmx7000M -D mapred.job.queue.name=bi -update hdfs://hadoop001:8020/bi/ctr/push_exposure_summary /bi/ctr/push_exposure_summary
 
-zeppelin-daemon.sh start
+sh zeppelin-daemon.sh start
