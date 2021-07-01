@@ -43,7 +43,7 @@ hive --hiveconf hive.execution.engine=mr -e "use stg; ALTER TABLE db_baoliao_bao
 alter table db_commonadmin_comment_data drop partition (dt='2019-05-22');
 
 insert overwrite local directory '/data/tmp/zhaoyulong/data' row format delimited fields terminated by '\t'
-select * from bi_test.zyl_tmp_190429_4 order by abtest,cast(sl as int);
+select distinct uid,did from bi_ods_ga.ods_app_sdk_log where dt='2021-04-14' and uid regexp '^[0-9]{10}$' and did is not null  order by uid;
 
 scp /data/jenkins/jobs/stg.tar.gz root@jenkins_new:/data/jenkins/jobs/
 scp -r /data/jenkins root@jenkins_new:/data/jenkins
@@ -279,3 +279,9 @@ hadoop distcp -D mapreduce.map.memory.mb=4096 -D mapreduce.map.java.opts=-Xmx300
 hadoop distcp -D mapreduce.map.memory.mb=4096 -D mapreduce.map.java.opts=-Xmx3000M -D mapreduce.reduce.memory.mb=8192 -D mapreduce.reduce.java.opts=-Xmx7000M -D mapred.job.queue.name=bi -update hdfs://hadoop001:8020/bi/ctr/push_exposure_summary /bi/ctr/push_exposure_summary
 
 sh zeppelin-daemon.sh start
+
+
+show columns in bi_ctr.haojia_exposure_summary_playback_ultimate;
+SHOW TBLPROPERTIES bi_ctr.haojia_exposure_summary_playback_ultimate;
+
+hive --orcfiledump /bi/dws_zdm/dws_zdm_hive_traffic_shence_click_h_bottombutton_user/dt=2021-03-01/project_id=2/part-00599-6dc8594c-87ea-46fe-886a-9e16f2045acf.c000

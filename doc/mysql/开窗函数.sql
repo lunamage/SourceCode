@@ -1,5 +1,3 @@
-SET @curRank := 0;
-SET @date:= NULL;
 
 SELECT IF(@date = date1, @curRank := @curRank + 1, @curRank := 1) AS rank,
        @date,
@@ -13,4 +11,4 @@ SELECT IF(@date = date1, @curRank := @curRank + 1, @curRank := 1) AS rank,
          WHERE     channel = 5
                AND DATE_FORMAT(pubdate, '%Y-%m') IN ('2014-01', '2014-02')
         GROUP BY domain_name_top, DATE_FORMAT(pubdate, '%Y-%m')
-        ORDER BY date1 ASC, totart DESC) F;
+        ORDER BY date1 ASC, totart DESC) F,(select @curRank := 0,@date:= NULL);

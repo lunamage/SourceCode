@@ -125,6 +125,8 @@ redis-cli -h 10.42.168.37 -p 6379
 redis-cli -h 10.42.168.37 keys "*" | xargs redis-cli -h 10.42.168.37 del
 redis-cli -h 10.42.126.216 -a wazhHcz52cchC1IlUF  keys "tmp*" | xargs redis-cli -h 10.42.126.216 -a wazhHcz52cchC1IlUF del
 
+redis-cli -h 10.45.4.60 scan 0 count 10000 | xargs redis-cli -h 10.45.4.60 del
+
 
 
 /data/local/flink-1.11.1/bin/sql-client.sh embedded -l /data/tmp/zhaoyulong/test2/
