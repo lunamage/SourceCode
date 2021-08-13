@@ -55,3 +55,6 @@ cd /data/source
 git pull --rebase origin master
 
 sh /data/gitupdate.sh
+
+
+gitk -- <file>
