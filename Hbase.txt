@@ -45,7 +45,8 @@ scan 'gmv:dim_isvcode',{FILTER=>"ValueFilter(=,'substring:dj')",LIMIT=>5}
 get 'bigwidetable','27228767'
 get 'gmv:dim_isvcode','996736482831dj'
 
-get 'dim:dim_zdm_all','2bb|33486713_3'
+get 'dim:dim_zdm_all','24e|82146340_76','cf1:haojia_source_name:toString'
+
 
 
 import org.apache.hadoop.hbase.filter.CompareFilter

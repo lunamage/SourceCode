@@ -281,7 +281,10 @@ hadoop distcp -D mapreduce.map.memory.mb=4096 -D mapreduce.map.java.opts=-Xmx300
 sh zeppelin-daemon.sh start
 
 
-show columns in bi_ctr.haojia_exposure_summary_playback_ultimate;
+show columns in dim_zdm.dim_zdm_hive_traffic_shence_user_d;
 SHOW TBLPROPERTIES bi_ctr.haojia_exposure_summary_playback_ultimate;
 
 hive --orcfiledump /bi/dws_zdm/dws_zdm_hive_traffic_shence_click_h_bottombutton_user/dt=2021-03-01/project_id=2/part-00599-6dc8594c-87ea-46fe-886a-9e16f2045acf.c000
+
+
+sudo sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db "INSERT or REPLACE INTO access VALUES('kTCCServiceMicrophone','com.microsoft.Powerpoint',0,1,1,NULL,NULL,NULL,'UNUSED',NULL,0,1634368251);"
