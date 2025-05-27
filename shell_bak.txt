@@ -1,0 +1,386 @@
+13
+sh /data/gitupdate.sh
+su - bi
+
+hive --hiveconf hive.cli.print.current.db=true --hiveconf hive.cli.print.header=true --hiveconf hive.execution.engine=tez --hiveconf mapred.job.queue.name=bi
+
+spark3-sql --jars /data/source/data_warehouse/pub_jar/mysql-connector-java-commercial-5.1.40-bin.jar,/data/source/data_warehouse/smzdm/jar/dependency/clickhouse-jdbc-0.3.1.jar,/data/source/data_warehouse/smzdm/jar/dependency/ImpalaJDBC41.jar --driver-class-path /data/source/data_warehouse/pub_jar/mysql-connector-java-commercial-5.1.40-bin.jar \
+--queue bi --name zyl --driver-memory 3g --executor-cores 4 --master yarn --executor-memory 20g --num-executors 20 --conf spark.default.parallelism=600 --conf spark.sql.shuffle.partitions=600 --conf spark.driver.maxResultSize=3g --conf spark.scheduler.listenerbus.eventqueue.capacity=1000000 --conf spark.scheduler.listenerbus.eventqueue.size=100000 \
+--conf spark.sql.catalog.paimon=org.apache.paimon.spark.SparkCatalog \
+--conf spark.sql.catalog.paimon.warehouse=hdfs://HDFS80727/bi/paimon \
+--conf spark.sql.extensions=org.apache.paimon.spark.extensions.PaimonSparkSessionExtensions \
+-d tx_date="$(date --date='1 day ago' +%Y-%m-%d)"
+
+
+
+
+
+show columns in bi_ctr.haojia_exposure_summary_playback_ultimate;
+SHOW TBLPROPERTIES bi_ctr.haojia_exposure_summary_playback_ultimate;
+
+rsync -avz /data/local/ root@az01:/data/local/ 
+rsync -avz /data/local/ root@az02:/data/local/
+
+rsync -avz /data/local/flink-1.16.2/ root@az02:/data/local/flink-1.16.2/
+
+
+
+rsync -avz /data/tmp/liyarong/ root@az01:/data/tmp/liyarong/
+rsync -avz /data/tmp/liyarong/ root@az02:/data/tmp/liyarong/
+
+
+clickhouse-client -h 10.45.36.154 -u bi_user --password wjZ2GhIUiBQM -m
+clickhouse-client -h 10.45.37.86 -u bi_user --password wjZ2GhIUiBQM -m
+
+
+SELECT *
+FROM system.distributed_ddl_queue
+WHERE cluster = 'default_cluster' AND status != 'Finished' limit 5;
+
+SELECT * FROM system.mutations WHERE is_done = 0 and `table`='ads_zdm_content_wiki_gmv_top';
+
+create table bi_app.ads_zdm_cust_buy_brand_tianbao on cluster default_cluster engine = MergeTree order by auto_id as select * from mysql('10.19.41.11:3306','app','ads_zdm_cust_buy_brand_tianbao','wdDBUser','2Gb(tv+-n'); 
+
+SELECT load_date,FQDN() as node,count(*)
+FROM clusterAllReplicas(default_cluster, bi_rep.ads_zdm_user_newpro_add_human)
+WHERE load_date='2024-09-08' 
+GROUP BY load_date,node;
+
+-- select substr(query,1,100) query_100,query,round(avg(query_duration_ms)/1000,0) avg_s
+-- FROM remote('10.45.2.119,10.45.2.200,10.45.4.149,10.45.3.17,10.45.5.241,10.45.7.69,10.45.6.87,10.45.5.40', 'system', 'query_log')
+-- WHERE toDate(formatDateTime(toDate(query_start_time),'%Y-%m-%d')) >= subtractDays(today(),7) 
+-- AND type = 'QueryFinish' 
+-- AND http_user_agent = 'Apache-HttpClient/4.5.6 (Java/1.8.0_92)' and query_duration_ms>0
+-- group by query_100,query
+-- having(avg(query_duration_ms)>10000)
+-- order by avg_s desc;
+
+
+admin Hnw95N#TZF
+账号 bi 密码 lg!14ekrHi
+
+
+select * from system.zookeeper where path='/clickhouse/task_queue/ddl' order by ctime desc limit 10;
+select * from system.distribution_queue where data_files<>0 limit 10;
+
+
+rsync -avz /data/local/flink-1.12.1/ root@ds01:/data/local/flink-1.12.1/
+rsync -avz /data/local/flink-1.12.1/ root@ds02:/data/local/flink-1.12.1/
+rsync -avz /data/local/flink-1.12.1/ root@ds03:/data/local/flink-1.12.1/
+
+rsync -avz root@data01:/home/sa_cluster/query_log_20220301.csv /data/tmp/zhaoyulong/
+
+OPTIMIZE TABLE bi_rep.dim_youhui on cluster default_cluster final;
+
+
+tar zxvf flink-1.16.2-bin-scala_2.12.tgz -C ./
+
+jumpserver-itoamms.smzdm.com
+--------------------------
+--达芬奇
+mysql -h10.45.7.128 -udavinci_user -pdyrt0rpUq1OrAclO -DdavinciDB
+
+select distinct v.id as view_id,v.name as view_name,d.id as dashboard_id,d.name as dashboard_name,v.`sql` as view_sql,project_name
+from(
+    select id,name,project_id,source_id,`sql`,update_time from view where `sql` like '%ads_zdm_dcsvcdata_smzdmadpagefile%'
+) v
+join (
+    select id from source where config like '%clickhouse%' 
+) s on v.source_id = s.id
+join (
+    select id, name,view_id from widget
+) w on v.id = w.view_id
+join (
+    select id,dashboard_id,widget_Id from mem_dashboard_widget
+) mdw on w.id = mdw.widget_Id
+join (
+    select id, name from dashboard
+) d on d.id = mdw.dashboard_id
+left join (select id as project_id,name as project_name ,user_id from project) p
+on v.project_id = p.project_id
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+实时数仓初期架构 痛点
+1.重复消费；大促期间网络带宽打满。11.1峰值3.8G
+2.业务逻辑多次调用，复用性差。
+3.代码耦合问题严重，需求越来越多，最后导致数据有一点修改，涉及的东西也很多。
+
+双11问题：
+1.sdk kafka网卡流量11.1峰值3.8G;kafka 限速
+2.离线sdk数据 磁盘容量不够 丢数据
+3.11.11 8点olap_order消费程序，由于yarn压力比较大，某些节点不稳定，导致心跳超时，程序重启有问题（手动重启，减小并发数，尽量避免分配到有压力大的机器；调整心跳超时相关配置）
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+工作成绩：比较快速的适应团队，重构期间负责社区业务相关建模以及开发工作，很好的完成所负责的任务。
+
+工作能力：专业技能符合团队预期，通过学习快速了解目前使用的技术栈，并投入开发工作。沟通以及团队协作能力都不错。
+
+价值观：符合公司的价值观，尊重、可靠、开发、极客精神。
+----------------------
+数仓重构
+S：之前数仓采用自下而上的建模方式，数据比较分散，整体规划较弱，数据的复用性不强，没有统一的规范；绝大多数数据离线计算的，满足不了用户对于实时数据的需求。基于以上问题，启动数据仓库重构项目。
+T：重新梳理业务过程，设计更在规范的建模；整合实时和离线任务，提高数据复用性，降低成本。
+A：新架构的设计，参考行业内流批一体的思想，通过kafka进行分层，实时回流到HDFS进行离线处理。期间梳理业务总线矩阵，针对内容域、流量域、互动域、用户域、营销域完成了主体重构，目前还差交易域、用户画像、特征这几部分，预计明年1月完成。
+R：
+降本：数据处理方面将离线与实时做融合，实时计算数据在离线场景复用，降低了资源计算成本。预计旧数仓下线后，计算资源每月节省 12w 左右，占总集群成本的15%；GA 下线，每月节省近7w，占总的数据分析软件费用50%。
+增效：数据更加规范，数据冗余以及规避了重复开发的工作；数据处理方面将离线与实时做融合，实时计算数据在离线场景复用，降低了资源计算成本。
+
+
+
+1.新架构的设计，参考行业内流批一体的思想，通过kafka进行分层，实时回流到HDFS进行离线处理。 
+2.参与开发规范的制定。
+3.公共脚本计算引擎的封装(spark、flink)。
+4.流量域基础数据建模开发工作。 
+5.带领开发团队设计并实施应用层用户画像、中间表替换、训练数据重构等相关工作。
+你的成就:
+1.新架构从分层、数据命名、数据开发、调度等更加规范。 2.实时数据应用更广泛了，其中我们提供给业务部门近400个字段的olap表，绝大数字段都是分钟级更新的。
+
+
+一、贡献
+1、中间表替换一期54张，包扩口径梳理、工作分配、进度跟进等。
+2、协助交易域、用户画像重构方案的制定以及后续的排期工作。
+3、完成推荐相关绝大多数需求的开发工作。
+二、问题
+1、交易域重构：方案设计阶段，时间没有控制好。
+2、用户画像重构：考虑到时间、开发成本，方案有妥协；开发先行，需求变更，导致返工情况比其他项目多一些
+
+工作时偶尔会比较粗心
+没有系统性解决问题的能力，排查问题没有思路
+
+开发能力
+执行力
+沟通能力
+
+
+对于数据源不是很熟悉，在具体实现上会判断失误
+--------
+git log --oneline --author="liqing" --since=2021-07-01 --until=2021-12-31 | wc -l
+git log --author="liqing" --since=2021-07-01 --until=2021-12-31 --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "added lines: %s, removed lines: %s, total lines: %s\n", add, subs, loc }'
+
+
+git log --format='%aN'| sort -u | while read name; do echo -en "$name\t"; git log --author="$name" --since=2021-07-01 --until=2021-12-31  --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "added lines: %s, removed lines: %s, total lines: %s\n", add, subs, loc }' -; done
+----------
+技术：
+1.flink cdc（流程更短、历史数据）
+2.flink 1.15（cp优化、动态表、混合数据源）
+3.zepplin 0.10
+4.引入数据湖后新架构的调整
+
+业务：
+1.设备库替换（spark图计算）
+2.特征重构（监控、大流量切换）
+3.训练数据自动化生成
+4.大屏重构
+5.流量拆分优化（规则引擎）
+6.画像的应用（精细化运营、用户分析、基于用户选择自动生成结果级）
+
+
+
+
+-------------------------------------------------------
+1.绩效打分 B 个人绩效系数：；集团系数：0.9；部门系数：0.84；21年H2绩效：23508
+	公司年底在裁员
+	绩效系数在所有部门中是中等偏上的分数；公司认可我们部门的价值；
+	主营业务还是比较稳的，只是增速没有那么高。
+	短期之内公司和大的经济环境比较困难，但是更要关注自己是否实现了个人成长；不管外部环境如何变糟糕，自己补短板，对职业生涯的帮助
+	
+	今年：
+	公司：平台化、去中心化的尝试，提升用户 转化率 效率
+	部门：
+	底层架构调整少，应用的价值（大屏、用户画像的应用、数仓任务级资源优化、湖仓一体架构的尝试、数据质量的提升）
+
+
+2.21年工作复盘
+一、贡献
+1. 由于 GMV 数据的特殊性, 需要经常排查 GMV 日常报表的问题, 维护 GMV 数据的稳定性
+2. 随着报表的增加对 GMV 任务执行效率不断进行优化,保障核心报表可以按时产出
+3. GMV 重构事项,离线侧开发
+成果:
+1. 保障大促期间 GMV 数据可以正常使用
+2. 满足 GMV 日常报表开发需求
+3. GMV 重构离线侧 dwd,dws基本开发完成
+二、问题
+1. 对项目的整体把控度不够, 使得任务排期不够合理
+2. 对细节的理解不够全面, 与产品交接时会忽视某些难点, 容易在某个节点卡壳, 开发时长被迫拖延
+
+开发能力、业务熟练	
+
+工作主动性不强
+容易陷入细节中
+
+
+任务进度慢提醒，陷入细节
+-------------------
+战略会：
+1.对产品理解更深入：之前应该是产品在柏林会议室介绍转载这种形式，其实当时我本身并没有太多信心，主要是通过值得买跳转到其他平台看内容的习惯很难形成；
+当时会问了下教授的感受，问题原话应该是‘你觉得这事能成吗’，教授给我翻出来国外一个类型差不多的app，当时心里还是有些疑虑的；
+这次战略会对这个产品的背景、产品的形态以及一些环境的解决方案，包括产品的定位‘工具类社区’等等，我让这边更加有信心了。
+2.通过其他部门的观点或者需求的阐述，让自己的视野更开阔一些；之前参加大部门周会其实也是这些人，但是因为会议的形式导致讨论的内容比较散；这次是对一个产品，大家的期望以及要做的事情，更聚焦一些。
+3.我自己这边对团队的贡献是不足的，先澄清一下，我这边并没有划水，每个人输出的信息，我都是在听、在思考的；
+对于一些问题，我觉得可能理解不够或者不知道对不对，所以想先看看大家是怎么做的。
+我自己的反思，最大的原因还是自己准备不足，之后会注意下。
+
+积累
+不难
+尊重别人的诉求
+聚焦问题解决（问题不重要）
+抓重点
+节奏提前（）
+-------------------
+今年上半年要做的事——Gen2
+背景：Gen1以好价为基础，CPS作为主要的收入来源；这个目前确实遇到了一些问题；
+1.拼多多，大量的这种0佣的商品，导致我们现在推也不是，不推也不是；而且拼多多的出现在改变用户的购物习惯，我想低价购买，直接去拼多多就行了，退货机制做的很好；
+2.大的环境不好，具体就是淘宝、京东，如果战略调整，对我们的佣金比减少，影响是很大的；
+3.从现象来看，我们老用户的留存很高，但是新用户的留存是比较低的，就是留不住新人。为什么呢，第一个是产品目标gmv、cps，不够有趣，第二个就是社区的内容质量是远低于其他平台的；
+
+目标：提高新用户留存，把主站营收模式从CPS转成整合营销，也就是商业化，广告等等；
+Gen2：以兴趣标签为基础给用户分发真正感兴趣的内容；目标就是成为社区类型的工具；
+
+1.兴趣，所有都基于兴趣标签，所以去年我们做了标签系统，可以给文章、商品去打标签；
+2.兴趣有了，就要解内容质量的问题了，所以去年提出来要做转载，转载的形式是我在提报的时候会选其他平台的文章，在上面做评论，再加上站内用ai对文章做一些总结，可能会加一些商品链接，发布出来；
+
+这个项目难度比较高，涉及到各个部门的配合，运营那边之前基于行业，需要转变基于兴趣，包括采集配合、算法这边的调整；
+现在确定的时间节奏是4月中旬上线所有gen2内容，然后每个月会发个小版本；
+情况基本就是这样。
+
+要求：
+1.日报每天都要写；
+2.所有工作需要往前推，不要卡在我们这；
+3.到点下班问题，现在是非常时期，公司从上到下都开始抓这个事；
+
+周末加班（一直到415）
+效率调整
+协作尽快推下去
+成本优化往前
+-------------------
+wedata：当时遇到个卡点，我们期望可以自己去通过git管理代码（诉求就是不希望上云容易，后续切换成本过高），一般云厂商这种开发平台数据，代码存在自己的数据库中；再加上重构进度已经进行一部分，换平台的倾向没有特别强烈。
+
+
+
+1.大数据压测环节如何执行，目前问题是组件比较多
+
+大数据压测：选核心场景、积累sql用例，单元测试用例库；
+京东：准备业务数据；
+核心：存算分离、弹性；
+
+
+2.成本：
+我负责数据仓库开发，经常对接一些业务需求，业务团队提出的需求往往没有roi评估，或者这种评估难以进行。这样会造成两个问题：
+ -资源分配的效率问题：可能资源被分配给那些可能不会带来预期收益的项目，从而造成资源浪费。
+ -功能维护的持续性问题：一些需求上线后，他的实际效益不明确。然而，数据仓库团队仍需持续投入资源进行维护，随着时间的推移，这可能导致数据仓库中积累大量效益不明的功能。
+所以问下咱们这边有没有这方面相关的经验可以借鉴下。
+
+成本预估；
+
+
+
+3.算法这边训练数据生成环节有些痛点；
+算法现状：我们开发好特征，写入到线上redis，推荐从里面获取特征，然后把用户当前匹配的特征记录到特征回放的kafka（这个是所有特征），我们消费数据，关联一些目标（点击、下单），生成训练数据；
+但这个虽然可以保证线上线下一致，但是试验周期太长了（新特征上线需要积累数据，算法可能需要1到两个月的训练数据）；
+所以这种新特征一般采用特征回溯的方式（比如按新特征生产的逻辑，加工到当前的训练数据中），这里面也出现了一些问题 比如特征计算不能穿越（简单来说不能把用户未来的行为算在当前的时间点），类似规则，不能保证和线上是一致的。
+而且每次刷数据的时间比较长。所以问下咱们这边产品或者经验可以借鉴下。
+
+【训练数据重构】建立训练数据处理的高效率方法，确保首页训练数据特征可配置生成；尝试迁移至Paimon存储，提升执行效率；
+
+数据安全
+
+
+4.大数据产品AI方向的探索（比如数据资产的搜索替换成AI）：还没做到这个程度，便工具类；AI for data 生成sql，洞察模型诊断
+
+
+
+todo：
+1.作业洞察（慢的原因：各种指标分析）开权限；合理建议。
+2.下线节点遇到问题；
+3.paimon遇到一些问题；
+4.wedata 新的功能、进展；
+5.算法相关 资料、组织会议；
+
+-------------------
+
+
+
+为了保持全集团各业务方数据统计口径统一，降低数仓存储和计算成本，减少不必要的数据冗余，实现计算结果复用，在2020年12月份开始启动该项目，1月份梳理完总线矩阵，7月份数仓针对内容域、流量域、互动域、用户域、营销域完成了主体重构。
+
+
+1.节省成本：预计旧数仓下线后，计算资源占总集群成本的 15% ；
+2.赋能业务：截止到12月，新数仓共输出了1000+张表，其中服务层表约200张，主要的内容明细宽表13张，共2152个业务字段，供成熟的业务方SQL取数使用，开给了运营中心、媒体事业部约50位业务人员；并在达芬奇平台输出了47张报表，报表数量节约30%左右，通过少量报表来满足更多使用场景 ；埋点管理平台实现了埋点的线上管理、填报、测试，降低了产品、测试、研发查询、管理和开发的复杂度；
+
+
+
+
+
+
+数仓重构
+S：之前数仓采用自下而上的建模方式，数据比较分散，整体规划较弱，数据的复用性不强，没有统一的规范；绝大多数数据离线计算的，满足不了用户对于实时数据的需求。基于以上问题，启动数据仓库重构项目。
+T：重新梳理业务过程，设计更在规范的建模；整合实时和离线任务，提高数据复用性，降低成本。
+A：新架构的设计，参考行业内流批一体的思想，通过kafka进行分层，实时回流到HDFS进行离线处理。期间梳理业务总线矩阵，针对内容域、流量域、互动域、用户域、营销域完成了主体重构，目前还差交易域、用户画像、特征这几部分，预计明年1月完成。
+R：
+降本：数据处理方面将离线与实时做融合，实时计算数据在离线场景复用，降低了资源计算成本。预计旧数仓下线后，计算资源每月节省 12w 左右，占总集群成本的15%；GA 下线，每月节省近7w，占总的数据分析软件费用50%。
+增效：数据更加规范，数据冗余以及规避了重复开发的工作；数据处理方面将离线与实时做融合，实时计算数据在离线场景复用，降低了资源计算成本。
+
+
+数据处理方面将离线与实时做融合，实时计算数据在离线场景复用，降低了资源计算成本。
+-----
+我先来给大家串一下，为什么会有这个会议以及我们这段时间在做什么事情。
+首先说下大的背景，今年大数据部门IDC的预算，我们做的时候就比较紧，2月底的时候又要求我们全年再降50W，所以我们成本的压力是比较大的。
+基于这个背景，我们这两个月也花费了很多精力在这上面。核心就两件事：1.降本；2.资源计算；（每个任务花费的资源对应的成本，或者值得买业务花费的成本等等）
+降本大致三块内容：
+1.磁盘，我们这边有些冷存的策略，根据数据的生命周期，删了数据，这块有些效果；
+2.flink任务，我们这边存储类型大部分都是fs，manj内存基本没用到，我们通过参数也优化掉了，释放了2.5T常驻内存；
+3.spark3升级到spark3.3，3开始自带监控（可以监控执行过程资源使用情况），而且相对比较准（之前我们使用sparklens，也是统计指标，准确度一般），通过这个我们就可以监控哪些任务资源配多了。目前我们调了200多个离线任务，降本效果也比较明显；
+
+大致内容就是这样，后续需要大家配合两件事：
+1.队列更换：需要各位把BI队列下面的任务迁出去，暂定放到bitest队列下面；这个事的诉求主要是可以更方便的做资源计算，而且后续我们可能会频繁的调整bi队列的资源，咱们这边独立出来也是尽量少受影响；
+2.spark2升级到3，我们暂定先调整sql程序，spark core语法可能会有区别；这个诉求就是我们要把yarn上的程序监控起来，资源使用是否合理。
+
+一会振海先同步下spark升级相关的信息
+最后针对这个事咱们讨论下执行节奏、可能遇到的问题、风险等等吧。
+
+-------------------
+
+
+数组Double：
+
+10、12.3、15.8、1000、91....
+
+大小：10TB
+
+单机：内存16GB、硬盘20TB
+
+如何进行全排序？
+
+二分
+全排序：制定份痛 hadoop hash 
+
+rdd 基础理论
+---------------------
+
+人生就是一场分别的旅程，我们最终都要分别；但是如果这段旅程足够精彩，那告别时会尝试回味这些精彩，来告慰我们的内心。
+因此我们都知道生活的终点在哪里，有的时候终点可能会提前来，这更提醒我们得把今天过好，我们最重要的是珍惜当下，珍惜眼前人。
+
+-----------
+1、hadoop 集群因小文件过多namenode内存使用率高，会导致hadoop集群不稳定namenode有时一次gc要几十秒，当前namenode节点内存使用率为95%，jvm内存使用率85%左右，oom和full gc概率会比较高；
+2、服务会随数据量增长更不稳定，namenode节点重启一次需要2小时左右才能正常提供服务，如果因为内存导致两个高可用节点都重启的话会导致服务长时间不能使用；
+3、解决方案需要大数据的研发投入一些时间和精力配合对当前集群中小文件进行合并，同时在生产数据时避免生成过多小文件增加namenode压力；
+
+小文件问题：
+1.表改为ORC，异步合并
+2.不好合并的表迁移至cos
+
+4、应用端和大数据端的自动化根因分析定位方案，可以在出现问题时通过日志、监控和链路追踪数据快速定位到问题的根因服务。
+
+申：
+优点：
+1.比较细心。目前是独立负责风控、商品库一些需求，由于这块的业务比较新，很多口径都是未知的（不像好价、社区、流量这种已经比较成熟了）。
+所以需要大量的时间和后端沟通口径，对给的口径做探查反馈，整个过程做的比较好。
+2.Doris应用这边也是做了一些olap调研、参数SQL调优等等；日常工作积极性比较高，问题响应也比较快；
+缺点：
+遇到问题倾向独立解决，反馈次数比较少，这样会导致可能有些情况会有效率问题，后面需要注意下。
+
+
+问题：
+1.红：数仓建模还是流批处理，建模流程，建模工具，缓慢变化维处理经验；挑战最大是什么；
+2.朱：风控负责哪一部分；
+3.姜：流程图，为什么还需要写hdfs；
+4.黄：对口径的效率问题，有没有方法；
