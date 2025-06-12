@@ -1,0 +1,204 @@
+templates:
+  - name: "abtest_analysis"
+    description: "AB测试分析模板，支持传入具体字段进行统计"
+    template: |
+      select concat('{{startDate}}','~','{{endDate}}') as `date_range`,
+      abtest,
+      cast(user_cnt as String) as `user_num`,
+      {{#metricFields}}
+      cast(ifnull(avg_{{fieldName}},0) as String) as peruser_{{fieldName}}{{#hasNext}},{{/hasNext}}
+      {{/metricFields}}
+      from(
+      select
+      abtest,
+      count(device_id) as `user_cnt`,
+      round(count(device_id)/count(distinct dt),4) as `user_cnt_perday`,
+      {{#metricFields}}
+      round(avg(sum_{{fieldName}}),6) as avg_{{fieldName}},
+      round(stddevPop(sum_{{fieldName}}),6) as std_{{fieldName}}{{#hasNext}},{{/hasNext}}
+      {{/metricFields}}
+      from
+      (
+      select
+      dt,device_id,if(hasAny(splitByString(',',abtest_collection),['{{controlGroups}}'])=1,'对照组',if(hasAny(splitByString(',',abtest_collection),['{{baselineGroups}}'])=1,'基线流','实验组')) as `abtest`,
+      {{#metricFields}}
+      {{aggregateFunction}}({{fieldName}}) as sum_{{fieldName}}{{#hasNext}},{{/hasNext}}
+      {{/metricFields}}
+      from {{tableName}}
+      where dt between toDate('{{startDate}}') and toDate('{{endDate}}') and
+      scence = '{{scence}}' and 
+      {{#versionFilter}}
+      match(app_version,'无')=0 and app_version<>'' and app_version <>'null' and match(app_version, '^[^一-龥]*$') = 1 and
+      (cast(CONCAT(leftPad(splitByString('.',app_version)[1],3,'0'),leftPad(splitByString('.',app_version)[2],3,'0'),leftPad(splitByString('.',app_version)[3],3,'0'),leftPad(splitByString('.',app_version)[4],3,'0')) as bigint) >= cast(CONCAT(leftPad(splitByString('.','{{minVersion}}')[1],3,'0'),leftPad(splitByString('.','{{minVersion}}')[2],3,'0'),leftPad(splitByString('.','{{minVersion}}')[3],3,'0'),leftPad(splitByString('.','{{minVersion}}')[4],3,'0')) as bigint)) and
+      {{/versionFilter}}
+      (hasAny(splitByString(',',abtest_collection),['{{controlGroups}}'])=1 or hasAny(splitByString(',',abtest_collection),['{{experimentGroups}}'])=1 or hasAny(splitByString(',',abtest_collection),['{{baselineGroups}}'])=1)
+      group by dt,device_id,if(hasAny(splitByString(',',abtest_collection),['{{controlGroups}}'])=1,'对照组',if(hasAny(splitByString(',',abtest_collection),['{{baselineGroups}}'])=1,'基线流','实验组'))
+      )
+      {{#filterCondition}}
+      where({{filterCondition}})
+      {{/filterCondition}}
+      group by abtest
+      )
+      union all
+      select concat('{{startDate}}','~','{{endDate}}') as `date_range`,
+      '实验组/对照组' abtest_scale,
+      '--' `user_num`,
+      {{#metricFields}}
+      cast(ifnull(round(sum(if(abtest='实验组',avg_{{fieldName}},0))/sum(if(abtest='对照组',avg_{{fieldName}},0))-1,6),0) as String){{#hasNext}},{{/hasNext}}
+      {{/metricFields}}
+      from(
+      select
+      abtest,
+      count(device_id) as `user_cnt`,
+      round(count(device_id)/count(distinct dt),4) as `user_cnt_perday`,
+      {{#metricFields}}
+      round(avg(sum_{{fieldName}}),6) as avg_{{fieldName}},
+      round(stddevPop(sum_{{fieldName}}),6) as std_{{fieldName}}{{#hasNext}},{{/hasNext}}
+      {{/metricFields}}
+      from
+      (
+      select
+      dt,device_id,if(hasAny(splitByString(',',abtest_collection),['{{controlGroups}}'])=1,'对照组',if(hasAny(splitByString(',',abtest_collection),['{{baselineGroups}}'])=1,'基线流','实验组')) as `abtest`,
+      {{#metricFields}}
+      {{aggregateFunction}}({{fieldName}}) as sum_{{fieldName}}{{#hasNext}},{{/hasNext}}
+      {{/metricFields}}
+      from {{tableName}}
+      where dt between toDate('{{startDate}}') and toDate('{{endDate}}') and
+      scence = '{{scence}}' and 
+      {{#versionFilter}}
+      match(app_version,'无')=0 and app_version<>'' and app_version <>'null' and match(app_version, '^[^一-龥]*$') = 1 and
+      (cast(CONCAT(leftPad(splitByString('.',app_version)[1],3,'0'),leftPad(splitByString('.',app_version)[2],3,'0'),leftPad(splitByString('.',app_version)[3],3,'0'),leftPad(splitByString('.',app_version)[4],3,'0')) as bigint) >= cast(CONCAT(leftPad(splitByString('.','{{minVersion}}')[1],3,'0'),leftPad(splitByString('.','{{minVersion}}')[2],3,'0'),leftPad(splitByString('.','{{minVersion}}')[3],3,'0'),leftPad(splitByString('.','{{minVersion}}')[4],3,'0')) as bigint)) and
+      {{/versionFilter}}
+      (hasAny(splitByString(',',abtest_collection),['{{controlGroups}}'])=1 or hasAny(splitByString(',',abtest_collection),['{{experimentGroups}}'])=1 or hasAny(splitByString(',',abtest_collection),['{{baselineGroups}}'])=1)
+      group by dt,device_id,if(hasAny(splitByString(',',abtest_collection),['{{controlGroups}}'])=1,'对照组',if(hasAny(splitByString(',',abtest_collection),['{{baselineGroups}}'])=1,'基线流','实验组'))
+      )
+      {{#filterCondition}}
+      where({{filterCondition}})
+      {{/filterCondition}}
+      group by abtest
+      )
+      {{#includeBaselineComparison}}
+      union all
+      select concat('{{startDate}}','~','{{endDate}}') as `date_range`,
+      '实验组/基线流' abtest_scale,
+      '--' `user_num`,
+      {{#metricFields}}
+      cast(ifnull(round(sum(if(abtest='实验组',avg_{{fieldName}},0))/sum(if(abtest='基线流',avg_{{fieldName}},0))-1,6),0) as String){{#hasNext}},{{/hasNext}}
+      {{/metricFields}}
+      from(
+      select
+      abtest,
+      count(device_id) as `user_cnt`,
+      round(count(device_id)/count(distinct dt),4) as `user_cnt_perday`,
+      {{#metricFields}}
+      round(avg(sum_{{fieldName}}),6) as avg_{{fieldName}},
+      round(stddevPop(sum_{{fieldName}}),6) as std_{{fieldName}}{{#hasNext}},{{/hasNext}}
+      {{/metricFields}}
+      from
+      (
+      select
+      dt,device_id,if(hasAny(splitByString(',',abtest_collection),['{{controlGroups}}'])=1,'对照组',if(hasAny(splitByString(',',abtest_collection),['{{baselineGroups}}'])=1,'基线流','实验组')) as `abtest`,
+      {{#metricFields}}
+      {{aggregateFunction}}({{fieldName}}) as sum_{{fieldName}}{{#hasNext}},{{/hasNext}}
+      {{/metricFields}}
+      from {{tableName}}
+      where dt between toDate('{{startDate}}') and toDate('{{endDate}}') and
+      scence = '{{scence}}' and 
+      {{#versionFilter}}
+      match(app_version,'无')=0 and app_version<>'' and app_version <>'null' and match(app_version, '^[^一-龥]*$') = 1 and
+      (cast(CONCAT(leftPad(splitByString('.',app_version)[1],3,'0'),leftPad(splitByString('.',app_version)[2],3,'0'),leftPad(splitByString('.',app_version)[3],3,'0'),leftPad(splitByString('.',app_version)[4],3,'0')) as bigint) >= cast(CONCAT(leftPad(splitByString('.','{{minVersion}}')[1],3,'0'),leftPad(splitByString('.','{{minVersion}}')[2],3,'0'),leftPad(splitByString('.','{{minVersion}}')[3],3,'0'),leftPad(splitByString('.','{{minVersion}}')[4],3,'0')) as bigint)) and
+      {{/versionFilter}}
+      (hasAny(splitByString(',',abtest_collection),['{{controlGroups}}'])=1 or hasAny(splitByString(',',abtest_collection),['{{experimentGroups}}'])=1 or hasAny(splitByString(',',abtest_collection),['{{baselineGroups}}'])=1)
+      group by dt,device_id,if(hasAny(splitByString(',',abtest_collection),['{{controlGroups}}'])=1,'对照组',if(hasAny(splitByString(',',abtest_collection),['{{baselineGroups}}'])=1,'基线流','实验组'))
+      )
+      {{#filterCondition}}
+      where({{filterCondition}})
+      {{/filterCondition}}
+      group by abtest
+      )
+      {{/includeBaselineComparison}}
+      {{#includeSignificanceTest}}
+      union all
+      select concat('{{startDate}}','~','{{endDate}}') as `date_range`,
+      '显著性' abtest_scale,
+      '--' `user_num`,
+      {{#metricFields}}
+      if((abs(sum(if(abtest='实验组',avg_{{fieldName}},0))-sum(if(abtest='对照组',avg_{{fieldName}},0)))/sqrt((power(sum(if(abtest='实验组',std_{{fieldName}},0)),2)/sum(if(abtest='实验组',user_cnt,0))+power(sum(if(abtest='对照组',std_{{fieldName}},0)),2)/sum(if(abtest='对照组',user_cnt,0)))))>1.96,'显著','不显著') as hyp_{{fieldName}}{{#hasNext}},{{/hasNext}}
+      {{/metricFields}}
+      from(
+      select
+      abtest,
+      count(device_id) as `user_cnt`,
+      round(count(device_id)/count(distinct dt),4) as `user_cnt_perday`,
+      {{#metricFields}}
+      round(avg(sum_{{fieldName}}),6) as avg_{{fieldName}},
+      round(stddevPop(sum_{{fieldName}}),6) as std_{{fieldName}}{{#hasNext}},{{/hasNext}}
+      {{/metricFields}}
+      from
+      (
+      select
+      dt,device_id,if(hasAny(splitByString(',',abtest_collection),['{{controlGroups}}'])=1,'对照组',if(hasAny(splitByString(',',abtest_collection),['{{baselineGroups}}'])=1,'基线流','实验组')) as `abtest`,
+      {{#metricFields}}
+      {{aggregateFunction}}({{fieldName}}) as sum_{{fieldName}}{{#hasNext}},{{/hasNext}}
+      {{/metricFields}}
+      from {{tableName}}
+      where dt between toDate('{{startDate}}') and toDate('{{endDate}}') and
+      scence = '{{scence}}' and 
+      {{#versionFilter}}
+      match(app_version,'无')=0 and app_version<>'' and app_version <>'null' and match(app_version, '^[^一-龥]*$') = 1 and
+      (cast(CONCAT(leftPad(splitByString('.',app_version)[1],3,'0'),leftPad(splitByString('.',app_version)[2],3,'0'),leftPad(splitByString('.',app_version)[3],3,'0'),leftPad(splitByString('.',app_version)[4],3,'0')) as bigint) >= cast(CONCAT(leftPad(splitByString('.','{{minVersion}}')[1],3,'0'),leftPad(splitByString('.','{{minVersion}}')[2],3,'0'),leftPad(splitByString('.','{{minVersion}}')[3],3,'0'),leftPad(splitByString('.','{{minVersion}}')[4],3,'0')) as bigint)) and
+      {{/versionFilter}}
+      (hasAny(splitByString(',',abtest_collection),['{{controlGroups}}'])=1 or hasAny(splitByString(',',abtest_collection),['{{experimentGroups}}'])=1 or hasAny(splitByString(',',abtest_collection),['{{baselineGroups}}'])=1)
+      group by dt,device_id,if(hasAny(splitByString(',',abtest_collection),['{{controlGroups}}'])=1,'对照组',if(hasAny(splitByString(',',abtest_collection),['{{baselineGroups}}'])=1,'基线流','实验组'))
+      )
+      {{#filterCondition}}
+      where({{filterCondition}})
+      {{/filterCondition}}
+      group by abtest
+      )
+      {{/includeSignificanceTest}}
+      {{#includeBaselineSignificanceTest}}
+      union all
+      select concat('{{startDate}}','~','{{endDate}}') as `date_range`,
+      '基线流显著性' abtest_scale,
+      '--' `user_num`,
+      {{#metricFields}}
+      if((abs(sum(if(abtest='实验组',avg_{{fieldName}},0))-sum(if(abtest='基线流',avg_{{fieldName}},0)))/sqrt((power(sum(if(abtest='实验组',std_{{fieldName}},0)),2)/sum(if(abtest='实验组',user_cnt,0))+power(sum(if(abtest='基线流',std_{{fieldName}},0)),2)/sum(if(abtest='基线流',user_cnt,0)))))>1.96,'显著','不显著') as hyp_{{fieldName}}{{#hasNext}},{{/hasNext}}
+      {{/metricFields}}
+      from(
+      select
+      abtest,
+      count(device_id) as `user_cnt`,
+      round(count(device_id)/count(distinct dt),4) as `user_cnt_perday`,
+      {{#metricFields}}
+      round(avg(sum_{{fieldName}}),6) as avg_{{fieldName}},
+      round(stddevPop(sum_{{fieldName}}),6) as std_{{fieldName}}{{#hasNext}},{{/hasNext}}
+      {{/metricFields}}
+      from
+      (
+      select
+      dt,device_id,if(hasAny(splitByString(',',abtest_collection),['{{controlGroups}}'])=1,'对照组',if(hasAny(splitByString(',',abtest_collection),['{{baselineGroups}}'])=1,'基线流','实验组')) as `abtest`,
+      {{#metricFields}}
+      {{aggregateFunction}}({{fieldName}}) as sum_{{fieldName}}{{#hasNext}},{{/hasNext}}
+      {{/metricFields}}
+      from {{tableName}}
+      where dt between toDate('{{startDate}}') and toDate('{{endDate}}') and
+      scence = '{{scence}}' and 
+      {{#versionFilter}}
+      match(app_version,'无')=0 and app_version<>'' and app_version <>'null' and match(app_version, '^[^一-龥]*$') = 1 and
+      (cast(CONCAT(leftPad(splitByString('.',app_version)[1],3,'0'),leftPad(splitByString('.',app_version)[2],3,'0'),leftPad(splitByString('.',app_version)[3],3,'0'),leftPad(splitByString('.',app_version)[4],3,'0')) as bigint) >= cast(CONCAT(leftPad(splitByString('.','{{minVersion}}')[1],3,'0'),leftPad(splitByString('.','{{minVersion}}')[2],3,'0'),leftPad(splitByString('.','{{minVersion}}')[3],3,'0'),leftPad(splitByString('.','{{minVersion}}')[4],3,'0')) as bigint)) and
+      {{/versionFilter}}
+      (hasAny(splitByString(',',abtest_collection),['{{controlGroups}}'])=1 or hasAny(splitByString(',',abtest_collection),['{{experimentGroups}}'])=1 or hasAny(splitByString(',',abtest_collection),['{{baselineGroups}}'])=1)
+      group by dt,device_id,if(hasAny(splitByString(',',abtest_collection),['{{controlGroups}}'])=1,'对照组',if(hasAny(splitByString(',',abtest_collection),['{{baselineGroups}}'])=1,'基线流','实验组'))
+      )
+      {{#filterCondition}}
+      where({{filterCondition}})
+      {{/filterCondition}}
+      group by abtest
+      )
+      {{/includeBaselineSignificanceTest}};
+
+default_params:
+  limit: 100
+  pageSize: 20
+  orderBy: "id DESC" 

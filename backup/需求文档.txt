@@ -1,0 +1,536 @@
+AB TEST后台-数据分析功能（数仓侧开发）
+背景
+详细信息见ABTest数据分析需求 
+【AB test后台】效果回归数据可视化需求 
+实验回归底表 
+https://confluence-team.smzdm.com/pages/viewpage.action?pageId=145237375
+一：ABTest的定义
+ABTest本身其实是物理学的“控制变量法”，通过只改变一个因素来确定其变化对CR(conversion rate)或者收益的影响。其本身具备统计意义，而且具备实际意义。
+A/B 实验是互联网场景中对比策略优劣的重要手段。为了验证一个新策略的效果，需要准备原策略 A 和新策略 B 两种方案。随后在总体用户中取出一小部分，将这部分用户完全随机地分在两个组中，使两组用户在统计角度无差别。将原策略 A 和新策略 B 分别展示给不同的用户组，一段时间后，结合统计方法分析数据，得到两种策略生效后指标的变化结果，并以此判断新策略 B 是否符合预期。
+试想一下如果没有ABTest，那新项目上线后的收益如何排除季节因素、市场环境因素的影响，而且一个页面上如果同时做多处改动，如何评判是哪个改动造成的收益或损失？这对一个理性思维的人是不可接受的。
+简单理解为将一群人分成两类，通过展示新旧版version A/B来测试哪种版本效果好，差异是多少。
+[图片]
+二：数据流转流程图
+暂时无法在飞书文档外展示此内容
+流程图说明：
+1. ①【实验显著性检验结果】查询与②【近30天趋势功能】查询是并行执行。
+2. 查询结果数据输出为两种形式选其一：
+  - 写入MYSQL然后调用接口通知后端可以拉取数据；
+  - 在调用接口通知后端可以拉取数时将结果数据集以接口的形式返回
+三：数仓提供功能如下：
+1. 实验检验结果：核心功能。后端将用户提交的查询条件封装成约定的格式，将条件通过消息队列传给数仓；数仓接受条件后，生成相应的查询语句，提交到数据库执行，完成后写入中间表。
+2. 数据趋势图支持：提供近期（30天，60天，90）汇总数据，作为前台页面展示的折线图的基础数据。
+3. 最小样本测算：事先做好底层宽表。具体字段为：指标名称、指标基准值、提升幅度、目标值、指标标准差、所需最小样本量。每日固定执行写入中间表任务。
+4. 日志记录：
+  1. 用户实验条件（数据分析）
+  2. 每次查询执行时间（细化每个环节执行过程）
+  3. 异常日志记录（用于排查系统问题）
+四：对接数据规范
+1. 【实验显著性检验结果】底表设计
+1.1 Kafka入参说明
+参数名称
+必填
+类型
+描述
+1. pid
+是
+String
+每次请求的唯一ID
+2. is_only_performance_data
+是
+String
+是否只要效果数据(0:返回全部数据;1:只返回实验效果数据;3:只返回实验效果详细数据)
+3. layered_id
+是
+String
+分层ID
+4. fields
+是
+Array
+筛选字段
+5. control_group
+是
+String
+对照组
+6. experience_group
+是
+String
+实验组
+7. version_number
+是
+String
+版本号（传一个，如9.0以上版本）
+8. begin_date
+是
+String
+开始日期
+9. end_date
+是
+String
+结束日期
+  特殊说明：is_only_performance_data：为区分是否需要展示实验效果详细数据。为了节省资源，前台页面可以将参数默认给0，即不需要近30天趋势数据。同时前端需要限制用户查询频次，避免同一查询条件重复发送查询请求。
+需要根据用户传入的条件解析为如下JSON，并且传入Kafka
+{
+    "pid":"123456",
+    "is_only_performance_data":"0",//是否只要效果数据(0:返回全部数据;1:只返回实验效果数据;3:只返回实验效果详细数据)
+    "layered_id":"55",
+    "fields":[
+        "avg_per_day_user_num",
+        "peruser_nonhaojia_expose_num",
+        "peruser_nonhaojia_click_num",
+        "peruser_nonhaojia_detail_page_read_duration",
+        "peruser_nonhaojia_total_duration",
+        "peruser_nonhaojia_addtocart"
+    ],
+    "control_group":"a|b|c", 
+    "experience_group":"w|x|y|z1|z5|z6|z7",
+    "version_number":"10.4.20",
+    "begin_date":"2023-01-01",
+    "end_date":"2023-01-10",
+    "unite_query_expno":"1001",//联合查询实验号
+    "user_type":"1"//(0:老用户;1:新用户;2:所有用户)
+}
+
+ABTest后台四期Kafka入参说明
+参数名称
+必填
+类型
+描述
+1. pid
+是
+String
+每次请求的唯一ID
+2. is_only_performance_data
+是
+String
+是否只要效果数据(0:返回全部数据;1:只返回实验效果数据;3:只返回实验效果详细数据)
+3. layered_id
+是
+String
+分层ID
+4. fields
+common
+weighting
+rate
+Collection
+distinct
+是
+
+String
+Array
+Array
+Array
+Array
+Array
+筛选字段
+common：通用类型字段；Array类型
+weighting：权重类型字段；Object类型（key是字段名、value是公式）
+rate：比率类型字段；Object类型（key是字段名、value是公式）
+collection：集合类型字段：Array类型
+distinct：去重类型字段；Array类型
+5. control_group
+是
+String
+对照组（可以传空：""；用来查询全部流量数据）
+6. experience_group
+是
+String
+实验组（不可以传空）
+7. version_number
+是
+String
+版本号（传一个，如9.0以上版本）
+8. begin_date
+是
+String
+开始时间（精确到小时）
+9. end_date
+是
+String
+结束时间（精确到小时）
+示例如下：
+{
+          "pid":  "123456",
+          "is_only_performance_data":  "0",
+          "layered_id":  "55",
+          "fields":  {
+                    "common":  [//通用类型字段
+                              "avg_per_day_user_num",
+                              "peruser_nonhaojia_expose_num",
+                              "peruser_nonhaojia_click_num",
+                              "peruser_nonhaojia_detail_page_read_duration",
+                              "peruser_nonhaojia_total_duration",
+                              "peruser_nonhaojia_addtocart"
+                    ],
+                    "weighting":  [//权重类型字段
+                              {
+                                        "weighting_a":  "(0.1*peruser_nonhaojia_expose_num)"
+                              },
+                              {
+                                        "weighting_b":  "(0.2*peruser_nonhaojia_click_num)"
+                              },
+                              {
+                                        "weighting_c":  "(0.3+peruser_nonhaojia_detail_page_read_duration)"
+                              }
+                    ],
+                    "rate":  [//比率类型字段
+                              {
+                                        "rate_c":  "(1.1-peruser_nonhaojia_total_duration)/peruser_nonhaojia_total_duration"
+                              },
+                              {
+                                        "rate_d":  "(2.2/peruser_nonhaojia_addtocart)/peruser_nonhaojia_addtocart"
+                              }
+                    ],
+                    "distinct":  [//去重类型字段
+                              "avg_per_day_user_num",
+                              "peruser_nonhaojia_expose_num",
+                              "peruser_nonhaojia_click_num",
+                              "peruser_nonhaojia_detail_page_read_duration",
+                              "peruser_nonhaojia_total_duration",
+                              "peruser_nonhaojia_addtocart"
+                    ]
+          },
+          "control_group":  "a|b|c",
+          "experience_group":  "w|x|y|z1|z5|z6|z7",
+          "version_number":  "10.4.20",
+          "begin_date":  "2024-02-01 10:00:00",//开始时间（精确到小时）
+          "end_date":  "2024-02-20 18:00:00",//结束时间（精确到小时）
+          "unite_query_expno":  "1001",//联合查询实验号
+          "user_type":  "1"//(0:老用户;1:新用户;2:所有用户)
+}
+}
+
+
+
+
+{
+          "pid":  "123456",
+          "is_only_performance_data":  "0",
+          "layered_id":  "55",
+          "fields":  {
+                    "common":  [
+                              "avg_per_day_user_num",
+                              "peruser_nonhaojia_expose_num",
+                              "peruser_nonhaojia_click_num",
+                              "peruser_nonhaojia_detail_page_read_duration",
+                              "peruser_nonhaojia_total_duration",
+                              "peruser_nonhaojia_addtocart"
+                    ],
+                    "weighting":  [
+                              {
+                                        "weighting_a":  "(0.1*peruser_nonhaojia_expose_num)"
+                              },
+                              {
+                                        "weighting_b":  "(0.2*peruser_nonhaojia_click_num)"
+                              },
+                              {
+                                        "weighting_c":  "(0.3+peruser_nonhaojia_detail_page_read_duration)"
+                              }
+                    ],
+                    "rate":  [
+                              {
+                                        "rate_c":  "(1.1-peruser_nonhaojia_total_duration)/peruser_nonhaojia_total_duration"
+                              },
+                              {
+                                        "rate_d":  "(2.2/peruser_nonhaojia_addtocart)/peruser_nonhaojia_addtocart"
+                              }
+                    ]
+          },
+          "control_group":  "a|b|c",
+          "experience_group":  "w|x|y|z1|z5|z6|z7",
+          "version_number":  "10.4.20",
+          "begin_date":  "2023-01-01",
+          "end_date":  "2023-01-10",
+          "unite_query_expno":  "1001",
+          "user_type":  "1"
+}
+
+
+2. 结果数据回传（写入中间表或者调取接口传入）
+2.1.1 方式一：结果数据中间表表结构（待确认）
+--mysql建表
+CREATE TABLE `ads_zdm_experimental_significance_test_results_mid` (
+    `pid` bigint(20) NOT NULL COMMENT 'PID',
+    `is_only_performance_data` int(8) NOT NULL COMMENT '是否只要效果数据(0:返回全部数据;1:只返回实验效果数据)',
+    `kafka_data` varchar(255) NOT NULL COMMENT 'KAFKA入参',
+    `results` mediumtext DEFAULT NULL COMMENT '结果集',
+    `load_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '加载时间',
+    `auto_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+    PRIMARY KEY (`auto_id`),
+    KEY `pid_auto_id` (`pid`,`auto_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='实验显著性检验结果中间表'
+;
+写入中间表完成后会调取后端接口，通知后端数据可以拉取使用。
+2.1.2 方式二：结果数据接口返回（待确认）
+{
+    "pid":"123456",
+    "user_type":"1",
+    "results":[
+        {
+            "users_covered_num":[//覆盖用户数
+                {
+                    "stream":"a",
+                    "people":"100",
+                    "percenage":"20"
+                },
+                {
+                    "stream":"b",
+                    "people":"200",
+                    "percenage":"20"
+                }
+            ]
+        },
+        {
+            "control_group":{//对照组
+                "date_range":"2022-12-10~2023-01-10",
+                "abtest":"对照组",
+                "avg_per_day_user_num":"351659.8438",
+                "peruser_nonhaojia_expose_num":"30.324485",
+                "peruser_nonhaojia_click_num":"1.655148",
+                "peruser_nonhaojia_detail_page_read_duration":"70.020939",
+                "peruser_nonhaojia_total_duration":"98.210708",
+                "peruser_nonhaojia_addtocart":"0.118958"，
+                "users_covered_num":"11"//覆盖用户数
+            }
+        },
+        {
+            "experience_group":{//实验组
+                "date_range":"2022-12-10~2023-01-10",
+                "abtest":"实验组",
+                "avg_per_day_user_num":"270333.875",
+                "peruser_nonhaojia_expose_num":"30.255907",
+                "peruser_nonhaojia_click_num":"1.654079",
+                "peruser_nonhaojia_detail_page_read_duration":"70.943125",
+                "peruser_nonhaojia_total_duration":"99.101443",
+                "peruser_nonhaojia_addtocart":"0.118739",
+                "users_covered_num":"11"//覆盖用户数
+            }
+        },
+        {
+            "comparative_increase":{//对比涨幅
+                "date_range":"20",
+                "abtest":"30",
+                "avg_per_day_user_num":"",
+                "peruser_nonhaojia_expose_num":"-0.002261",
+                "peruser_nonhaojia_click_num":"-0.000646",
+                "peruser_nonhaojia_detail_page_read_duration":"0.01317",
+                "peruser_nonhaojia_total_duration":"0.00907",
+                "peruser_nonhaojia_addtocart":"-0.001841",
+                "users_covered_num":"11"//覆盖用户数
+            }
+        },
+        {
+            "significant":{//对比显著性
+                "date_range":"20",
+                "abtest":"30",
+                "avg_per_day_user_num":"",
+                "peruser_nonhaojia_expose_num":"-0.002261",
+                "peruser_nonhaojia_click_num":"-0.000646",
+                "peruser_nonhaojia_detail_page_read_duration":"0.01317",
+                "peruser_nonhaojia_total_duration":"0.00907",
+                "peruser_nonhaojia_addtocart":"-0.001841",
+                "users_covered_num":"11"//覆盖用户数
+            }
+        },
+        
+       
+       
+       //2023-07-31 新增基线流数据
+        {
+            "global_baseline_flow":{//全局基线流
+                "date_range":"2022-12-10~2023-01-10",
+                "abtest":"基线流数据",
+                "avg_per_day_user_num":"351659.8438",
+                "peruser_nonhaojia_expose_num":"30.324485",
+                "peruser_nonhaojia_click_num":"1.655148",
+                "peruser_nonhaojia_detail_page_read_duration":"70.020939",
+                "peruser_nonhaojia_total_duration":"98.210708",
+                "peruser_nonhaojia_addtocart":"0.118958"，
+                 "users_covered_num":"11"//覆盖用户数
+            }
+        },
+         {
+            "global_baseline_flow_increase":{//对比全局基线流涨幅
+                "date_range":"2022-12-10~2023-01-10",
+                "abtest":"对比实验组基线流数据涨幅",
+                "avg_per_day_user_num":"",
+                "peruser_nonhaojia_expose_num":"-0.002261",
+                "peruser_nonhaojia_click_num":"-0.000646",
+                "peruser_nonhaojia_detail_page_read_duration":"0.01317",
+                "peruser_nonhaojia_total_duration":"0.00907",
+                "peruser_nonhaojia_addtocart":"-0.001841"，
+                 "users_covered_num":"11"//覆盖用户数
+            }
+        },
+         {
+            "global_baseline_flow_significant":{//对比全局基线流显著性
+                "date_range":"2022-12-10~2023-01-10",
+                "abtest":"对比实验组基线流数据显著性",
+                "avg_per_day_user_num":"",
+                "peruser_nonhaojia_expose_num":"不显著",
+                "peruser_nonhaojia_click_num":"不显著",
+                "peruser_nonhaojia_detail_page_read_duration":"显著",
+                "peruser_nonhaojia_total_duration":"不显著",
+                "peruser_nonhaojia_addtocart":"显著"，
+                 "users_covered_num":"11"//覆盖用户数 2024-03-05新增
+            }
+        },
+        
+        
+        
+        
+        
+        
+        {
+            "detail_data":[//详细数据
+                {
+                    "2023-01-10":[
+                        {
+                            "date_range":"2022-12-10~2023-01-10",
+                            "abtest":"a",
+                            "avg_per_day_user_num":"351659.8438",
+                            "peruser_nonhaojia_expose_num":"30.324485",
+                            "peruser_nonhaojia_click_num":"1.655148",
+                            "peruser_nonhaojia_detail_page_read_duration":"70.020939",
+                            "peruser_nonhaojia_total_duration":"98.210708",
+                            "peruser_nonhaojia_addtocart":"0.118958"
+                        },
+                        {
+                            "date_range":"2022-12-10~2023-01-10",
+                            "abtest":"b",
+                            "avg_per_day_user_num":"270333.875",
+                            "peruser_nonhaojia_expose_num":"30.255907",
+                            "peruser_nonhaojia_click_num":"1.654079",
+                            "peruser_nonhaojia_detail_page_read_duration":"70.943125",
+                            "peruser_nonhaojia_total_duration":"99.101443",
+                            "peruser_nonhaojia_addtocart":"0.118739"
+                        },
+                   {//2024-03-05新增
+                            "date_range":"2022-12-10~2023-01-10",
+                            "abtest":"实验组",
+                            "avg_per_day_user_num":"351659.8438",
+                            "peruser_nonhaojia_expose_num":"30.324485",
+                            "peruser_nonhaojia_click_num":"1.655148",
+                            "peruser_nonhaojia_detail_page_read_duration":"70.020939",
+                            "peruser_nonhaojia_total_duration":"98.210708",
+                            "peruser_nonhaojia_addtocart":"0.118958"
+                },
+                 {//2024-03-05新增
+                             "date_range":"2022-12-10~2023-01-10",
+                            "abtest":"对照组",
+                            "avg_per_day_user_num":"270333.875",
+                            "peruser_nonhaojia_expose_num":"30.255907",
+                            "peruser_nonhaojia_click_num":"1.654079",
+                            "peruser_nonhaojia_detail_page_read_duration":"70.943125",
+                            "peruser_nonhaojia_total_duration":"99.101443",
+                            "peruser_nonhaojia_addtocart":"0.118739"
+                }，
+                 {//2024-03-05新增
+                            "date_range":"2022-12-10~2023-01-10",
+                            "abtest":"基线流",
+                            "avg_per_day_user_num":"270333.875",
+                            "peruser_nonhaojia_expose_num":"30.255907",
+                            "peruser_nonhaojia_click_num":"1.654079",
+                            "peruser_nonhaojia_detail_page_read_duration":"70.943125",
+                            "peruser_nonhaojia_total_duration":"99.101443",
+                            "peruser_nonhaojia_addtocart":"0.118739"
+                }
+                
+                        
+                    ]
+                },
+                {
+                    "2023-01-09":[
+                        {
+                            "date_range":"2022-12-09~2023-01-09",
+                            "abtest":"a",
+                            "avg_per_day_user_num":"323659.8438",
+                            "peruser_nonhaojia_expose_num":"33.324485",
+                            "peruser_nonhaojia_click_num":"1.542148",
+                            "peruser_nonhaojia_detail_page_read_duration":"70.020939",
+                            "peruser_nonhaojia_total_duration":"98.210708",
+                            "peruser_nonhaojia_addtocart":"0.118958"
+                        },
+                        {
+                            "date_range":"2022-12-09~2023-01-09",
+                            "abtest":"b",
+                            "avg_per_day_user_num":"270333.875",
+                            "peruser_nonhaojia_expose_num":"30.255907",
+                            "peruser_nonhaojia_click_num":"1.654079",
+                            "peruser_nonhaojia_detail_page_read_duration":"70.943125",
+                            "peruser_nonhaojia_total_duration":"99.101443",
+                            "peruser_nonhaojia_addtocart":"0.118739"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+
+  任务执行完成后，会调取后端接口通知数据可用，同时将数据以接口的方式进行返回。
+接口返回数据和中间表中results字段的值一致，都为JSON形式，需要后端解析后使用。
+3. 【近30天趋势功能】
+{
+    "pid":"123456",
+    "results":{
+        "2023-01-10":[
+            {
+                "date_range":"2022-12-10~2023-01-10",
+                "abtest":"对照组",
+                "avg_per_day_user_num":"351659.8438",
+                "peruser_nonhaojia_expose_num":"30.324485",
+                "peruser_nonhaojia_click_num":"1.655148",
+                "peruser_nonhaojia_detail_page_read_duration":"70.020939",
+                "peruser_nonhaojia_total_duration":"98.210708",
+                "peruser_nonhaojia_addtocart":"0.118958"
+            },
+            {
+                "date_range":"2022-12-10~2023-01-10",
+                "abtest":"实验组",
+                "avg_per_day_user_num":"270333.875",
+                "peruser_nonhaojia_expose_num":"30.255907",
+                "peruser_nonhaojia_click_num":"1.654079",
+                "peruser_nonhaojia_detail_page_read_duration":"70.943125",
+                "peruser_nonhaojia_total_duration":"99.101443",
+                "peruser_nonhaojia_addtocart":"0.118739"
+            }
+        ],
+        "2023-01-09":[
+            {
+                "date_range":"2022-12-09~2023-01-09",
+                "abtest":"对照组",
+                "avg_per_day_user_num":"323659.8438",
+                "peruser_nonhaojia_expose_num":"33.324485",
+                "peruser_nonhaojia_click_num":"1.542148",
+                "peruser_nonhaojia_detail_page_read_duration":"70.020939",
+                "peruser_nonhaojia_total_duration":"98.210708",
+                "peruser_nonhaojia_addtocart":"0.118958"
+            },
+            {
+                "date_range":"2022-12-09~2023-01-09",
+                "abtest":"实验组",
+                "avg_per_day_user_num":"270333.875",
+                "peruser_nonhaojia_expose_num":"30.255907",
+                "peruser_nonhaojia_click_num":"1.654079",
+                "peruser_nonhaojia_detail_page_read_duration":"70.943125",
+                "peruser_nonhaojia_total_duration":"99.101443",
+                "peruser_nonhaojia_addtocart":"0.118739"
+            }
+        ]
+    }
+}
+数据流转与【实验显著性检验结果】一致，但是需要注意以下几点：
+  1. JSON数据会以 "2023-01-10" ：[...]；"2023-01-09" ：[...]；来区分近30天每日的数据。
+  2. 前台页面发送的查询请求内容，转换成JSON写入Kafka后，数仓根据本次查询条件会走两套查询任务，一套任务用来支持【实验显著性检验结果】，另一套任务用来支持【近30天趋势功能】。
+  3. 两套任务执行完成后需要调用后端不同的两个接口来进行数据返回（如果是以中间表形式返回数据，会以特定字段进行区分），彼此任务隔离，哪个任务先完成就先调用哪个接口返回数据。
+4. 【最小样本量测算】
+目前讨论结果是先按中间表需求的形式进行处理。
+五、具体开发任务
+  AB Test后台项目计划与执行（数仓侧开发） 
+1. Kafka中的JSON解析；
+2. 结合JSON解析出的字段进行查询任务SQL的拼接；
+3. 将查询结果拼接成指定JSON形式；
+4. 结果数据以中间表或者直接调取的接口的方式进行返回；
+5. 保留原始查询数据、计算结果数据、关键日志数据，便于后续问题排查；
+6. 建立任务异常告警群，及时发现问题。
