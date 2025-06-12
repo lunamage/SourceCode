@@ -99,7 +99,6 @@ public class SqlTemplateLoader {
     /**
      * 验证模板配置的有效性
      */
-    @SuppressWarnings("unchecked")
     public boolean validateTemplateConfig(String resourcePath) {
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (inputStream == null) {
@@ -110,6 +109,7 @@ public class SqlTemplateLoader {
             @SuppressWarnings("unchecked")
             Map<String, Object> config = yamlMapper.readValue(inputStream, Map.class);
             
+            @SuppressWarnings("unchecked")
             List<Map<String, Object>> templates = (List<Map<String, Object>>) config.get("templates");
             if (templates == null || templates.isEmpty()) {
                 logger.error("配置文件中没有找到模板定义");
